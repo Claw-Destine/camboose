@@ -1,4 +1,8 @@
-package datatypes
+package recipies
+
+type RecipeConfig struct {
+	RecipePath string `env:"RECIPE_PATH"`
+}
 
 type ReqStatus string
 
@@ -22,24 +26,16 @@ const (
 	DesignEntityView DesignEntity = "view"
 )
 
-type Project struct {
-	Name   string
-	Recipe string
+type ReqDescription struct {
+	Me    ReqEntity
+	Child *ReqEntity
 }
 
-type Version struct {
-	VersionString string
-	Status        ReqStatus
+type ProjectManagement struct {
+	Relations []ReqDescription
 }
 
-type Requirement struct {
-	Ver    Version
-	Parent *Requirement
-	Type   ReqEntity
-}
-
-type Design struct {
-	Requirement Requirement
-	Parent      *Design
-	Type        DesignEntity
+type Recipe struct {
+	Name        string
+	Description string
 }
