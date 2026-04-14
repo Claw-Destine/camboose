@@ -31,5 +31,7 @@ func main() {
 
 	slog.Info("Recipe Path", "recipe-path", cfg.Recipies.RecipePath)
 
+	cfg.Rest.RecipiesCtr = recipies.NewRecipeController(cfg.Recipies)
+
 	rest.StartRestService(cfg.Rest)
 }

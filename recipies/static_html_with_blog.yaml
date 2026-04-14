@@ -1,5 +1,4 @@
-name: static_html_with_blog
-description: This recipe is for creating static HTML websites with a markdown defined blog.
+description: Static HTML with blog
 project_management:
   relations:
     epic:
