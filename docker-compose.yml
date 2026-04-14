@@ -38,6 +38,81 @@ services:
       NEO4J_MCP_SERVER_PATH: "/mcp/"
       NEO4J_NAMESPACE: "${NEO4J_NAMESPACE:-local}"
 
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.48.2-jammy
+    container_name: playwright
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DEBUG: "pw:api"
+    shm_size: 1gb
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: penpot-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "penpot"
+      POSTGRES_USER: "penpot"
+      POSTGRES_PASSWORD: "${PENPOT_DB_PASSWORD:-penpot-password}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U penpot"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: penpot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  penpot-backend:
+    image: penpotapp/backend:latest
+    container_name: penpot-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "6063:6063"
+    environment:
+      PENPOT_DATABASE_URL: "postgresql://penpot:${PENPOT_DB_PASSWORD:-penpot-password}@postgres:5432/penpot"
+      PENPOT_REDIS_URL: "redis://redis:6379/0"
+      PENPOT_SECRET_KEY: "${PENPOT_SECRET_KEY:-change-me-in-production}"
+      PENPOT_ALLOW_SELF_REGISTRATION: "true"
+    volumes:
+      - penpot_storage:/app/storage
+
+  penpot-frontend:
+    image: penpotapp/frontend:latest
+    container_name: penpot-frontend
+    restart: unless-stopped
+    depends_on:
+      - penpot-backend
+    ports:
+      - "80:80"
+    environment:
+      PENPOT_BACKEND_URL: "http://penpot-backend:6063"
+
 volumes:
   neo4j_data:
   neo4j_logs:
+  postgres_data:
+  redis_data:
+  penpot_storage:
