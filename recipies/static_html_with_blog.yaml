@@ -1,4 +1,4 @@
-name: Static HTML with blog
+name: static_html_with_blog
 description: This recipe is for creating static HTML websites with a markdown defined blog.
 project_management:
   relations:
