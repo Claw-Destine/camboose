@@ -1,5 +1,1 @@
 description: Static HTML with blog
-project_management:
-  relations:
-    epic:
-      view:
