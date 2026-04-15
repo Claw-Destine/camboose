@@ -90,10 +90,12 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "6063:6063"
+      - "6063:6060"
     environment:
-      PENPOT_DATABASE_URL: "postgresql://penpot:${PENPOT_DB_PASSWORD:-penpot-password}@postgres:5432/penpot"
-      PENPOT_REDIS_URL: "redis://redis:6379/0"
+      PENPOT_DATABASE_URI: "postgresql://postgres:5432/penpot"
+      PENPOT_DATABASE_USERNAME: "penpot"
+      PENPOT_DATABASE_PASSWORD: "${PENPOT_DB_PASSWORD:-penpot-password}"
+      PENPOT_REDIS_URI: "redis://redis:6379/0"
       PENPOT_SECRET_KEY: "${PENPOT_SECRET_KEY:-change-me-in-production}"
       PENPOT_ALLOW_SELF_REGISTRATION: "true"
     volumes:
@@ -105,10 +107,23 @@ services:
     restart: unless-stopped
     depends_on:
       - penpot-backend
+      - penpot-exporter
     ports:
-      - "80:80"
+      - "8081:8080"
     environment:
       PENPOT_BACKEND_URL: "http://penpot-backend:6063"
+
+  penpot-exporter:
+    image: penpotapp/exporter:latest
+    container_name: penpot-exporter
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      PENPOT_REDIS_URI: "redis://redis:6379/0"
+      PENPOT_PUBLIC_URI: "http://localhost:8081"
+      PENPOT_SECRET_KEY: "${PENPOT_SECRET_KEY:-change-me-in-production}"
 
 volumes:
   neo4j_data:
