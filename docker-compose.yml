@@ -92,6 +92,7 @@ services:
     ports:
       - "6063:6060"
     environment:
+      PENPOT_FLAGS: "disable-email-verification"
       PENPOT_DATABASE_URI: "postgresql://postgres:5432/penpot"
       PENPOT_DATABASE_USERNAME: "penpot"
       PENPOT_DATABASE_PASSWORD: "${PENPOT_DB_PASSWORD:-penpot-password}"
@@ -111,6 +112,7 @@ services:
     ports:
       - "8081:8080"
     environment:
+      PENPOT_FLAGS: "disable-email-verification"
       PENPOT_BACKEND_URL: "http://penpot-backend:6063"
 
   penpot-exporter:
