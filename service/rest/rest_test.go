@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"claw-destine.com/camboose/service/datatypes"
 	"claw-destine.com/camboose/service/recipies"
 )
 
@@ -116,7 +117,7 @@ func TestRecipiesHandlerReturnsRecipesForValidGetWithCredentials(t *testing.T) {
 		t.Fatalf("unexpected Content-Type: got %q, want %q", got, "application/json")
 	}
 
-	var gotRecipes []recipies.Recipe
+	var gotRecipes []datatypes.Recipe
 	if err := json.Unmarshal(rr.Body.Bytes(), &gotRecipes); err != nil {
 		t.Fatalf("failed to decode response body: %v", err)
 	}

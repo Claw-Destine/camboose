@@ -7,38 +7,12 @@ import (
 	"sort"
 	"strings"
 
+	"claw-destine.com/camboose/service/datatypes"
 	"gopkg.in/yaml.v3"
 )
 
 type RecipeConfig struct {
 	RecipePath string `env:"PATH"`
-}
-
-type ReqStatus string
-
-const (
-	ReqStatusNew       ReqStatus = "new"
-	ReqStatusDefined   ReqStatus = "defined"
-	ReqStatusDelivered ReqStatus = "delivered"
-)
-
-type ReqEntity string
-
-const (
-	ReqEntityEpic                ReqEntity = "epic"
-	ReqEntityStory               ReqEntity = "story"
-	ReqEntityAcceptanceCriterion ReqEntity = "acceptance_cryterion"
-)
-
-type DesignEntity string
-
-const (
-	DesignEntityView DesignEntity = "view"
-)
-
-type Recipe struct {
-	Name        string
-	Description string
 }
 
 type RecipeController struct {
@@ -56,14 +30,14 @@ func NewRecipeController(cfg RecipeConfig) RecipeController {
 	return RecipeController{cfg: cfg}
 }
 
-func (rc RecipeController) ListRecipies() []Recipe {
+func (rc RecipeController) ListRecipies() []datatypes.Recipe {
 	entries, err := os.ReadDir(rc.cfg.RecipePath)
 	if err != nil {
 		slog.Error("Could not read recipe directory", "path", rc.cfg.RecipePath, "error", err)
-		return []Recipe{}
+		return []datatypes.Recipe{}
 	}
 
-	recipies := make([]Recipe, 0, len(entries))
+	recipies := make([]datatypes.Recipe, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -74,7 +48,7 @@ func (rc RecipeController) ListRecipies() []Recipe {
 		baseName := strings.TrimSuffix(name, ext)
 		recipePath := filepath.Join(rc.cfg.RecipePath, name)
 
-		recipe := Recipe{Name: baseName}
+		recipe := datatypes.Recipe{Name: baseName}
 		rc.enrichRecipeFromYAML(recipePath, &recipe)
 
 		recipies = append(recipies, recipe)
@@ -87,7 +61,7 @@ func (rc RecipeController) ListRecipies() []Recipe {
 	return recipies
 }
 
-func (rc RecipeController) enrichRecipeFromYAML(recipePath string, recipe *Recipe) {
+func (rc RecipeController) enrichRecipeFromYAML(recipePath string, recipe *datatypes.Recipe) {
 	ext := strings.ToLower(filepath.Ext(recipePath))
 	if ext != ".yaml" && ext != ".yml" {
 		return
