@@ -28,8 +28,8 @@ type Recipe struct {
 }
 
 type Project struct {
-	Name   string
-	Recipe string
+	Name   string `json:"name"`
+	Recipe string `json:"recipe"`
 }
 
 type Version struct {
