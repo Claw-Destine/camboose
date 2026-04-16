@@ -11,8 +11,11 @@ import (
 )
 
 var (
-	ErrProjectExists  = errors.New("project already exists")
-	ErrProjectInvalid = errors.New("project payload is invalid")
+	ErrProjectExists   = errors.New("project already exists")
+	ErrProjectInvalid  = errors.New("project payload is invalid")
+	ErrProjectNotFound = errors.New("project not found")
+	ErrVersionExists   = errors.New("version already exists")
+	ErrVersionInvalid  = errors.New("version payload is invalid")
 )
 
 type GraphDBConfig struct {
@@ -27,6 +30,9 @@ type ProjectController interface {
 	ListProjects(ctx context.Context) ([]datatypes.Project, error)
 	GetProject(ctx context.Context, name string) (datatypes.Project, bool, error)
 	DeleteProject(ctx context.Context, name string) (bool, error)
+	CreateVersion(ctx context.Context, projectName string, version datatypes.Version) (datatypes.Version, error)
+	ListVersions(ctx context.Context, projectName string) ([]datatypes.Version, error)
+	GetVersion(ctx context.Context, projectName string, number int) (datatypes.Version, bool, error)
 	Close(ctx context.Context) error
 }
 
@@ -65,6 +71,17 @@ func (c *Neo4jProjectController) ensureConstraints(ctx context.Context) error {
 			`CREATE CONSTRAINT project_name_unique IF NOT EXISTS
 			 FOR (p:Project)
 			 REQUIRE p.name IS UNIQUE`,
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = tx.Run(
+			ctx,
+			`CREATE CONSTRAINT version_project_number_unique IF NOT EXISTS
+			 FOR (v:Version)
+			 REQUIRE (v.projectName, v.number) IS UNIQUE`,
 			nil,
 		)
 		if err != nil {
@@ -224,7 +241,11 @@ func (c *Neo4jProjectController) DeleteProject(ctx context.Context, name string)
 		result, err := tx.Run(
 			ctx,
 			`MATCH (p:Project {name: $name})
-			 DETACH DELETE p
+			 OPTIONAL MATCH (p)-[:HAS_VERSION]->(v:Version)
+			 WITH p, COLLECT(v) AS versions
+			 FOREACH (version IN versions | DETACH DELETE version)
+			 WITH p
+			 DELETE p
 			 RETURN COUNT(p) AS deleted`,
 			map[string]any{"name": name},
 		)
@@ -252,6 +273,181 @@ func (c *Neo4jProjectController) DeleteProject(ctx context.Context, name string)
 	return deletedAny.(bool), nil
 }
 
+func (c *Neo4jProjectController) CreateVersion(ctx context.Context, projectName string, version datatypes.Version) (datatypes.Version, error) {
+	projectName = strings.TrimSpace(projectName)
+	version.Name = strings.TrimSpace(version.Name)
+	version.Status = strings.TrimSpace(version.Status)
+
+	if projectName == "" || version.Number <= 0 || version.Status == "" {
+		return datatypes.Version{}, ErrVersionInvalid
+	}
+
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: c.database})
+	defer session.Close(ctx)
+
+	project, found, err := c.GetProject(ctx, projectName)
+	if err != nil {
+		return datatypes.Version{}, err
+	}
+	if !found || project.Name == "" {
+		return datatypes.Version{}, ErrProjectNotFound
+	}
+
+	_, exists, err := c.GetVersion(ctx, projectName, version.Number)
+	if err != nil {
+		return datatypes.Version{}, err
+	}
+	if exists {
+		return datatypes.Version{}, ErrVersionExists
+	}
+
+	createdAny, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		result, err := tx.Run(
+			ctx,
+			`MATCH (p:Project {name: $projectName})
+			 CREATE (p)-[:HAS_VERSION]->(v:Version {
+				projectName: $projectName,
+				number: $number,
+				name: $name,
+				status: $status
+			 })
+			 RETURN v.number AS number, v.name AS name, v.status AS status`,
+			map[string]any{
+				"projectName": projectName,
+				"number":      int64(version.Number),
+				"name":        version.Name,
+				"status":      version.Status,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		record, err := result.Single(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return datatypes.Version{
+			Number: getIntValue(record, "number"),
+			Name:   getStringValue(record, "name"),
+			Status: getStringValue(record, "status"),
+		}, nil
+	})
+	if err != nil {
+		return datatypes.Version{}, fmt.Errorf("create version: %w", err)
+	}
+
+	return createdAny.(datatypes.Version), nil
+}
+
+func (c *Neo4jProjectController) ListVersions(ctx context.Context, projectName string) ([]datatypes.Version, error) {
+	projectName = strings.TrimSpace(projectName)
+	if projectName == "" {
+		return nil, ErrVersionInvalid
+	}
+
+	project, found, err := c.GetProject(ctx, projectName)
+	if err != nil {
+		return nil, err
+	}
+	if !found || project.Name == "" {
+		return nil, ErrProjectNotFound
+	}
+
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: c.database})
+	defer session.Close(ctx)
+
+	versionsAny, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		result, err := tx.Run(
+			ctx,
+			`MATCH (:Project {name: $projectName})-[:HAS_VERSION]->(v:Version)
+			 RETURN v.number AS number, v.name AS name, v.status AS status
+			 ORDER BY v.number`,
+			map[string]any{"projectName": projectName},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		records, err := result.Collect(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		versions := make([]datatypes.Version, 0, len(records))
+		for _, record := range records {
+			versions = append(versions, datatypes.Version{
+				Number: getIntValue(record, "number"),
+				Name:   getStringValue(record, "name"),
+				Status: getStringValue(record, "status"),
+			})
+		}
+
+		return versions, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("list versions: %w", err)
+	}
+
+	return versionsAny.([]datatypes.Version), nil
+}
+
+func (c *Neo4jProjectController) GetVersion(ctx context.Context, projectName string, number int) (datatypes.Version, bool, error) {
+	projectName = strings.TrimSpace(projectName)
+	if projectName == "" || number <= 0 {
+		return datatypes.Version{}, false, ErrVersionInvalid
+	}
+
+	project, found, err := c.GetProject(ctx, projectName)
+	if err != nil {
+		return datatypes.Version{}, false, err
+	}
+	if !found || project.Name == "" {
+		return datatypes.Version{}, false, ErrProjectNotFound
+	}
+
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: c.database})
+	defer session.Close(ctx)
+
+	versionAny, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		result, err := tx.Run(
+			ctx,
+			`MATCH (:Project {name: $projectName})-[:HAS_VERSION]->(v:Version {projectName: $projectName, number: $number})
+			 RETURN v.number AS number, v.name AS name, v.status AS status`,
+			map[string]any{"projectName": projectName, "number": int64(number)},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if !result.Next(ctx) {
+			if err := result.Err(); err != nil {
+				return nil, err
+			}
+
+			return nil, nil
+		}
+
+		record := result.Record()
+
+		return datatypes.Version{
+			Number: getIntValue(record, "number"),
+			Name:   getStringValue(record, "name"),
+			Status: getStringValue(record, "status"),
+		}, nil
+	})
+	if err != nil {
+		return datatypes.Version{}, false, fmt.Errorf("get version: %w", err)
+	}
+
+	if versionAny == nil {
+		return datatypes.Version{}, false, nil
+	}
+
+	return versionAny.(datatypes.Version), true, nil
+}
+
 func (c *Neo4jProjectController) Close(ctx context.Context) error {
 	return c.driver.Close(ctx)
 }
@@ -268,4 +464,18 @@ func getStringValue(record *neo4j.Record, key string) string {
 	}
 
 	return stringValue
+}
+
+func getIntValue(record *neo4j.Record, key string) int {
+	value, ok := record.Get(key)
+	if !ok {
+		return 0
+	}
+
+	intValue, ok := value.(int64)
+	if !ok {
+		return 0
+	}
+
+	return int(intValue)
 }

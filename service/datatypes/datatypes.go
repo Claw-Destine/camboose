@@ -33,6 +33,7 @@ type Project struct {
 }
 
 type Version struct {
-	VersionString string
-	Status        ReqStatus
+	Number int    `json:"number"`
+	Name   string `json:"name,omitempty"`
+	Status string `json:"status"`
 }

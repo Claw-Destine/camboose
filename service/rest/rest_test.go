@@ -21,10 +21,14 @@ import (
 
 type fakeProjectController struct {
 	projects map[string]datatypes.Project
+	versions map[string]map[int]datatypes.Version
 }
 
 func newFakeProjectController() *fakeProjectController {
-	return &fakeProjectController{projects: make(map[string]datatypes.Project)}
+	return &fakeProjectController{
+		projects: make(map[string]datatypes.Project),
+		versions: make(map[string]map[int]datatypes.Version),
+	}
 }
 
 func (f *fakeProjectController) CreateProject(_ context.Context, project datatypes.Project) (datatypes.Project, error) {
@@ -40,6 +44,7 @@ func (f *fakeProjectController) CreateProject(_ context.Context, project datatyp
 	}
 
 	f.projects[project.Name] = project
+	f.versions[project.Name] = make(map[int]datatypes.Version)
 	return project, nil
 }
 
@@ -71,7 +76,74 @@ func (f *fakeProjectController) DeleteProject(_ context.Context, name string) (b
 	}
 
 	delete(f.projects, name)
+	delete(f.versions, name)
 	return true, nil
+}
+
+func (f *fakeProjectController) CreateVersion(_ context.Context, projectName string, version datatypes.Version) (datatypes.Version, error) {
+	projectName = strings.TrimSpace(projectName)
+	version.Name = strings.TrimSpace(version.Name)
+	version.Status = strings.TrimSpace(version.Status)
+
+	if projectName == "" || version.Number <= 0 || version.Status == "" {
+		return datatypes.Version{}, graphdb.ErrVersionInvalid
+	}
+
+	if _, ok := f.projects[projectName]; !ok {
+		return datatypes.Version{}, graphdb.ErrProjectNotFound
+	}
+
+	if _, ok := f.versions[projectName]; !ok {
+		f.versions[projectName] = make(map[int]datatypes.Version)
+	}
+
+	if _, ok := f.versions[projectName][version.Number]; ok {
+		return datatypes.Version{}, graphdb.ErrVersionExists
+	}
+
+	f.versions[projectName][version.Number] = version
+	return version, nil
+}
+
+func (f *fakeProjectController) ListVersions(_ context.Context, projectName string) ([]datatypes.Version, error) {
+	projectName = strings.TrimSpace(projectName)
+	if projectName == "" {
+		return nil, graphdb.ErrVersionInvalid
+	}
+
+	if _, ok := f.projects[projectName]; !ok {
+		return nil, graphdb.ErrProjectNotFound
+	}
+
+	projectVersions := f.versions[projectName]
+	versions := make([]datatypes.Version, 0, len(projectVersions))
+	for _, version := range projectVersions {
+		versions = append(versions, version)
+	}
+
+	sort.Slice(versions, func(i, j int) bool {
+		return versions[i].Number < versions[j].Number
+	})
+
+	return versions, nil
+}
+
+func (f *fakeProjectController) GetVersion(_ context.Context, projectName string, number int) (datatypes.Version, bool, error) {
+	projectName = strings.TrimSpace(projectName)
+	if projectName == "" || number <= 0 {
+		return datatypes.Version{}, false, graphdb.ErrVersionInvalid
+	}
+
+	if _, ok := f.projects[projectName]; !ok {
+		return datatypes.Version{}, false, graphdb.ErrProjectNotFound
+	}
+
+	version, ok := f.versions[projectName][number]
+	if !ok {
+		return datatypes.Version{}, false, nil
+	}
+
+	return version, true, nil
 }
 
 func (f *fakeProjectController) Close(_ context.Context) error {
@@ -382,6 +454,136 @@ func TestNewMuxRoutesProjectEndpoints(t *testing.T) {
 	}
 }
 
+func TestVersionCollectionHandlerCreatesVersion(t *testing.T) {
+	cfg := newTestConfig(t)
+	collection := newProjectsCollectionHandler(cfg)
+	seedProject(t, collection, `{"name":"demo","recipe":"static_html_with_blog"}`)
+
+	h := newProjectsItemHandler(cfg)
+	body := bytes.NewBufferString(`{"number":1,"name":"MVP","status":"active"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/project/demo/version", body)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusCreated)
+	}
+
+	var version datatypes.Version
+	if err := json.Unmarshal(rr.Body.Bytes(), &version); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+
+	if version.Number != 1 || version.Name != "MVP" || version.Status != "active" {
+		t.Fatalf("unexpected version: got %+v", version)
+	}
+}
+
+func TestVersionCollectionHandlerListsVersions(t *testing.T) {
+	cfg := newTestConfig(t)
+	collection := newProjectsCollectionHandler(cfg)
+	seedProject(t, collection, `{"name":"demo","recipe":"static_html_with_blog"}`)
+
+	h := newProjectsItemHandler(cfg)
+	seedVersion(t, h, "demo", `{"number":2,"status":"released"}`)
+	seedVersion(t, h, "demo", `{"number":1,"name":"MVP","status":"active"}`)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/project/demo/version", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	var versions []datatypes.Version
+	if err := json.Unmarshal(rr.Body.Bytes(), &versions); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+
+	want := []datatypes.Version{
+		{Number: 1, Name: "MVP", Status: "active"},
+		{Number: 2, Status: "released"},
+	}
+	if !reflect.DeepEqual(versions, want) {
+		t.Fatalf("unexpected versions: got %+v, want %+v", versions, want)
+	}
+}
+
+func TestVersionItemHandlerReturnsVersion(t *testing.T) {
+	cfg := newTestConfig(t)
+	collection := newProjectsCollectionHandler(cfg)
+	seedProject(t, collection, `{"name":"demo","recipe":"static_html_with_blog"}`)
+
+	h := newProjectsItemHandler(cfg)
+	seedVersion(t, h, "demo", `{"number":3,"name":"Beta","status":"active"}`)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/project/demo/version/3", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	var version datatypes.Version
+	if err := json.Unmarshal(rr.Body.Bytes(), &version); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+
+	if version.Number != 3 || version.Name != "Beta" || version.Status != "active" {
+		t.Fatalf("unexpected version: got %+v", version)
+	}
+}
+
+func TestVersionHandlerReturnsNotFoundForUnknownProject(t *testing.T) {
+	cfg := newTestConfig(t)
+	h := newProjectsItemHandler(cfg)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/project/missing/version", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusNotFound)
+	}
+}
+
+func TestVersionItemHandlerReturnsBadRequestForInvalidNumber(t *testing.T) {
+	cfg := newTestConfig(t)
+	h := newProjectsItemHandler(cfg)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/project/demo/version/not-a-number", nil)
+	rr := httptest.NewRecorder()
+
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusBadRequest)
+	}
+}
+
+func TestVersionCollectionHandlerReturnsConflictWhenVersionExists(t *testing.T) {
+	cfg := newTestConfig(t)
+	collection := newProjectsCollectionHandler(cfg)
+	seedProject(t, collection, `{"name":"demo","recipe":"static_html_with_blog"}`)
+
+	h := newProjectsItemHandler(cfg)
+	seedVersion(t, h, "demo", `{"number":1,"status":"active"}`)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/project/demo/version", bytes.NewBufferString(`{"number":1,"status":"released"}`))
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusConflict {
+		t.Fatalf("unexpected status: got %d, want %d", rr.Code, http.StatusConflict)
+	}
+}
+
 func seedProjects(t *testing.T, handler http.HandlerFunc) {
 	t.Helper()
 	seedProject(t, handler, `{"name":"demo","recipe":"static_html_with_blog"}`)
@@ -395,6 +597,16 @@ func seedProject(t *testing.T, handler http.HandlerFunc, payload string) {
 	handler.ServeHTTP(rr, req)
 	if rr.Code != http.StatusCreated {
 		t.Fatalf("unexpected seed status: got %d, want %d", rr.Code, http.StatusCreated)
+	}
+}
+
+func seedVersion(t *testing.T, handler http.HandlerFunc, projectName string, payload string) {
+	t.Helper()
+	req := httptest.NewRequest(http.MethodPost, "/api/project/"+projectName+"/version", bytes.NewBufferString(payload))
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("unexpected version seed status: got %d, want %d", rr.Code, http.StatusCreated)
 	}
 }
 
@@ -457,6 +669,18 @@ func (errProjectController) GetProject(context.Context, string) (datatypes.Proje
 
 func (errProjectController) DeleteProject(context.Context, string) (bool, error) {
 	return false, errors.New("boom")
+}
+
+func (errProjectController) CreateVersion(context.Context, string, datatypes.Version) (datatypes.Version, error) {
+	return datatypes.Version{}, errors.New("boom")
+}
+
+func (errProjectController) ListVersions(context.Context, string) ([]datatypes.Version, error) {
+	return nil, errors.New("boom")
+}
+
+func (errProjectController) GetVersion(context.Context, string, int) (datatypes.Version, bool, error) {
+	return datatypes.Version{}, false, errors.New("boom")
 }
 
 func (errProjectController) Close(context.Context) error {
