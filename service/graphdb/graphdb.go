@@ -46,7 +46,38 @@ func NewNeo4jProjectController(ctx context.Context, cfg GraphDBConfig) (*Neo4jPr
 		return nil, fmt.Errorf("verify neo4j connectivity: %w", err)
 	}
 
-	return &Neo4jProjectController{driver: driver, database: cfg.Database}, nil
+	controller := &Neo4jProjectController{driver: driver, database: cfg.Database}
+	if err := controller.ensureConstraints(ctx); err != nil {
+		_ = driver.Close(ctx)
+		return nil, err
+	}
+
+	return controller, nil
+}
+
+func (c *Neo4jProjectController) ensureConstraints(ctx context.Context) error {
+	session := c.driver.NewSession(ctx, neo4j.SessionConfig{DatabaseName: c.database})
+	defer session.Close(ctx)
+
+	_, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		_, err := tx.Run(
+			ctx,
+			`CREATE CONSTRAINT project_name_unique IF NOT EXISTS
+			 FOR (p:Project)
+			 REQUIRE p.name IS UNIQUE`,
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+	if err != nil {
+		return fmt.Errorf("ensure project constraints: %w", err)
+	}
+
+	return nil
 }
 
 func (c *Neo4jProjectController) CreateProject(ctx context.Context, project datatypes.Project) (datatypes.Project, error) {
