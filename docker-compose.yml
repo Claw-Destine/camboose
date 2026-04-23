@@ -101,6 +101,7 @@ services:
       PENPOT_ALLOW_SELF_REGISTRATION: "true"
     volumes:
       - penpot_storage:/app/storage
+      - penpot_assets:/opt/data/assets
 
   penpot-frontend:
     image: penpotapp/frontend:latest
@@ -114,6 +115,8 @@ services:
     environment:
       PENPOT_FLAGS: "disable-email-verification"
       PENPOT_BACKEND_URL: "http://penpot-backend:6063"
+    volumes:
+      - penpot_assets:/opt/data/assets
 
   penpot-exporter:
     image: penpotapp/exporter:latest
@@ -133,3 +136,4 @@ volumes:
   postgres_data:
   redis_data:
   penpot_storage:
+  penpot_assets:
