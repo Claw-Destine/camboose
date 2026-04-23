@@ -1,34 +1,17 @@
 # camboose
 
+<img src="static/assets/camboose_logo.png" alt="logo" width="300"/>
+
 Recipe driven software management AI workflow orchestrator
 
 ## Project structure
 
 ```sh
 |- recipies # Example recipies
-|- service # GoLang backend
-|- web # Vue frontend
-```
+|- core # GoLang - application logic
+|- webapp # Templ + HTMX frontend
+|- static # Shared resources
 
-## Frontend
-
-The frontend is a Vite + Vue application in `web/`.
-
-```sh
-cd web
-npm install
-npm run dev
-```
-
-The Vite dev server proxies `/api` requests to the Go service on `http://localhost:8080`.
-
-## Backend
-
-The project is using Go workspace. You can start the backebd directly from the root folder:
-
-```sh
-go run ./service
-```
 
 ## 3rd Pary software
 
