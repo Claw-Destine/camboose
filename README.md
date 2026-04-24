@@ -1,8 +1,8 @@
 # camboose
 
-<img src="static/assets/camboose_logo.png" alt="logo" width="300"/>
+<img src="static/assets/camboose_logo.png" alt="logo" width="200"/>
 
-Recipe driven software management AI workflow orchestrator
+Recipe driven software development AI workflow orchestrator
 
 ## Project structure
 

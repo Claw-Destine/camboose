@@ -5,12 +5,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="assets/camboose_favicon.png" />
+    <link rel="stylesheet" href="css/bulma.min.css">
+    <script src="js/htmx.min.js"></script>
     <title>Camboose</title>
 </head>
 
 <body>
-    <h1>Camboose</h1>
-    <img src="assets/camboose_logo.png" alt="logo" width="300"/>
+    <aside class="menu">
+        <figure class="image is-128x128">
+            <img src="assets/camboose_logo.png" alt="logo" />
+        </figure>
+        <h1 class="title">Camboose</h1>
+        <p class="menu-label">Camboose</p>
+    </aside>
+    <div hx-get="/components" hx-trigger="load"></div>
+    
+    
 </body>
 
 </html>
