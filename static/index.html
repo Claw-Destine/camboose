@@ -8,6 +8,32 @@
     <link rel="stylesheet" href="css/bulma.min.css">
     <script src="js/htmx.min.js"></script>
     <title>Camboose</title>
+    <style>
+        @media (min-width: 600px) {
+            body {
+                display: flex;
+                height: 100vh;
+                margin: 0;
+            }
+
+            aside {
+                height: 100vh;
+                overflow-y: auto;
+            }
+
+            .container {
+                flex: 1;
+                overflow-y: auto;
+            }
+        }
+    </style>
+    <script>
+        function setActiveMenu(clickedElement) {
+            const menuItems = document.querySelectorAll('#menu-list a');
+            menuItems.forEach(item => item.classList.remove('is-active'));
+            clickedElement.classList.add('is-active');
+        }
+    </script>
 </head>
 
 <body>
@@ -16,11 +42,13 @@
             <img src="assets/camboose_logo.png" alt="logo" />
         </figure>
         <h1 class="title">Camboose</h1>
-        <p class="menu-label">Camboose</p>
+        <ul class="menu-list" id="menu-list">
+            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects" hx-target="#container" >Projects</a>
+            </li>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks" hx-target="#container">Tasks</a></li>
+        </ul>
     </aside>
-    <div hx-get="/components" hx-trigger="load"></div>
-    
-    
+    <div id="container" class="container" hx-get="/components/projects" hx-trigger="load"></div>
 </body>
 
 </html>
