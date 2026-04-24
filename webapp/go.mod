@@ -2,7 +2,12 @@ module claw-destine.com/camboose/webapp
 
 go 1.26.2
 
-require github.com/a-h/templ v0.3.1001
+replace claw-destine.com/camboose/core => ../core
+
+require (
+	claw-destine.com/camboose/core v0.0.0-00010101000000-000000000000
+	github.com/a-h/templ v0.3.1001
+)
 
 require (
 	github.com/a-h/parse v0.0.0-20250122154542-74294addb73e // indirect

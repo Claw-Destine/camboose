@@ -1,5 +1,11 @@
 package projects
 
+import (
+	cp "claw-destine.com/camboose/core/projectmanagement"
+	"strings"
+)
+
 templ Projects() {
 	<div>Projects</div>
+	{ strings.Join(cp.ListProjects(), " , " ) }
 }

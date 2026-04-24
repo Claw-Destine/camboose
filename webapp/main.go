@@ -16,4 +16,5 @@ func main() {
 	http.Handle("/components/tasks", templ.Handler(tasks.Tasks()))
 
 	http.ListenAndServe(":3000", nil)
+
 }
