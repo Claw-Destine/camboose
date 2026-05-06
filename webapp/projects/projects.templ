@@ -1,16 +1,19 @@
 package projects
 
-import (
-	cp "claw-destine.com/camboose/core/projectmanagement"
-	"strings"
-)
-
 templ Projects() {
 	<div class="columns">
 		<div class="column is-one-fifth">
 			<nav class="panel">
 				<p class="panel-heading">Projects</p>
-				{ strings.Join(cp.ListProjects(), " , " ) }
+				<div class="panel-block">
+					<p class="control has-icons-left">
+						<input class="input" type="text" placeholder="Search"/>
+						<span class="icon is-left">
+							<i class="fas fa-search" aria-hidden="true"></i>
+						</span>
+					</p>
+				</div>
+				<div class="panel-block">?</div>
 			</nav>
 		</div>
 		<div class="column">Auto</div>
