@@ -1,5 +1,8 @@
 package projects
 
+import pm "claw-destine.com/camboose/core/projectmanagement"
+
+
 templ Projects() {
 	<div class="columns">
 		<div class="column is-one-fifth">
@@ -13,7 +16,9 @@ templ Projects() {
 						</span>
 					</p>
 				</div>
-				<div class="panel-block">?</div>
+				for _, p := range pm.ListProjects() {
+					<a class="panel-block">{ p }</a>
+				}
 			</nav>
 		</div>
 		<div class="column">Auto</div>
