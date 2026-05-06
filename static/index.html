@@ -6,27 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="assets/camboose_favicon.png" />
     <link rel="stylesheet" href="css/bulma.min.css">
+    <link rel="stylesheet" href="css/custom.css">
     <script src="js/htmx.min.js"></script>
     <title>Camboose</title>
-    <style>
-        @media (min-width: 600px) {
-            body {
-                display: flex;
-                height: 100vh;
-                margin: 0;
-            }
-
-            aside {
-                height: 100vh;
-                overflow-y: auto;
-            }
-
-            .container {
-                flex: 1;
-                overflow-y: auto;
-            }
-        }
-    </style>
     <script>
         function setActiveMenu(clickedElement) {
             const menuItems = document.querySelectorAll('#menu-list a');
@@ -37,18 +19,22 @@
 </head>
 
 <body>
-    <aside class="menu">
-        <figure class="image is-128x128">
-            <img src="assets/camboose_logo.png" alt="logo" />
-        </figure>
-        <h1 class="title">Camboose</h1>
-        <ul class="menu-list" id="menu-list">
-            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects" hx-target="#container" >Projects</a>
-            </li>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks" hx-target="#container">Tasks</a></li>
-        </ul>
-    </aside>
-    <div id="container" class="container" hx-get="/components/projects" hx-trigger="load"></div>
+    <div class="columns">
+        <aside class="menu column is-narrow">
+            <figure class="image is-128x128">
+                <img src="assets/camboose_logo.png" alt="logo" />
+            </figure>
+            <h1 class="title">Camboose</h1>
+            <ul class="menu-list" id="menu-list">
+                <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
+                        hx-target="#main-container">Projects</a>
+                </li>
+                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
+                        hx-target="#main-container">Tasks</a></li>
+            </ul>
+        </aside>
+        <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load"></div>
+    </div>
 </body>
 
 </html>

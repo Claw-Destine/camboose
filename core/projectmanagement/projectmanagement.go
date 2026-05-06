@@ -6,7 +6,7 @@ import (
 )
 
 type ProjectManager struct {
-	Db *ds.Store
+	Db *ds.ProjectStore
 }
 
 func (pm *ProjectManager) CreateProject(name string) *dt.Project {

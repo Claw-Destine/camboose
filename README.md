@@ -11,7 +11,7 @@ Recipe driven software development AI workflow orchestrator
 |- core # GoLang - application logic
 |- webapp # Templ + HTMX frontend
 |- static # Shared resources
-
+```
 
 ## 3rd Pary software
 

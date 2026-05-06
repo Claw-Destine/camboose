@@ -10,7 +10,7 @@ type CloverStore struct {
 	db *c.DB
 }
 
-func CreateCloverStore(dbname string) ds.Store {
+func CreateCloverStore(dbname string) ds.ProjectStore {
 	db, _ := c.Open(dbname)
 	return &CloverStore{db: db}
 }

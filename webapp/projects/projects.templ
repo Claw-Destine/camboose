@@ -6,6 +6,13 @@ import (
 )
 
 templ Projects() {
-	<div>Projects</div>
-	{ strings.Join(cp.ListProjects(), " , " ) }
+	<div class="columns">
+		<div class="column is-one-fifth">
+			<nav class="panel">
+				<p class="panel-heading">Projects</p>
+				{ strings.Join(cp.ListProjects(), " , " ) }
+			</nav>
+		</div>
+		<div class="column">Auto</div>
+	</div>
 }
