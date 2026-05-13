@@ -52,8 +52,17 @@ func (cs *CloverStore) CreateProject(name string) (*dt.Project, error) {
 func (cs *CloverStore) UpdateProject(project dt.Project) {
 
 }
-func (cs *CloverStore) GetProject(id string) *dt.Project {
-	return &dt.Project{}
+func (cs *CloverStore) GetProject(id string) (*dt.Project, error) {
+	doc, err := cs.db.FindById(ds.COL_PROJECTS, id)
+	if err != nil {
+		return nil, err
+	}
+	p := &dt.Project{}
+	err = doc.Unmarshal(p)
+	if err != nil {
+		slog.Error("Failed to unmarshal document", "Error", err)
+	}
+	return p, nil
 }
 func (cs *CloverStore) GetProjects() []dt.Project {
 	docs, _ := cs.db.FindAll(q.NewQuery(ds.COL_PROJECTS))

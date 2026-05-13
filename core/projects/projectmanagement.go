@@ -17,6 +17,14 @@ func (pm *ProjectManager) CreateProject(name string) (*dt.Project, error) {
 	return p, err
 }
 
+func (pm *ProjectManager) GetProjectById(id string) (*dt.Project, error) {
+	p, err := pm.Db.GetProject(id)
+	if err != nil {
+		return nil, err
+	}
+	return p, err
+}
+
 func (pm *ProjectManager) ListProjects() []dt.Project {
 	return pm.Db.GetProjects()
 }

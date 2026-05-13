@@ -3,6 +3,7 @@ package components
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 
 	dt "claw-destine.com/camboose/core/datatypes"
 
@@ -19,6 +20,18 @@ type ProjectHandler struct {
 
 func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	urlPart := strings.Split(r.URL.Path, "/")
+
+	pid := urlPart[len(urlPart)-1]
+
+	p, err := ph.projectManager.GetProjectById(pid)
+	if err != nil {
+		slog.Error("Failed to fetch project", "id", pid, "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+	}
+
+	projectComponent(*p).Render(r.Context(), w)
 }
 
 func NewProjectsHandler(pm *pm.ProjectManager) ProjectsHandler {

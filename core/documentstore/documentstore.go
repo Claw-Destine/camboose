@@ -15,7 +15,7 @@ type Store interface {
 type ProjectStore interface {
 	CreateProject(name string) (*dt.Project, error)
 	UpdateProject(project dt.Project)
-	GetProject(id string) *dt.Project
+	GetProject(id string) (*dt.Project, error)
 	GetProjects() []dt.Project
 	DeleteProject() []dt.Project
 }
