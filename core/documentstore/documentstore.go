@@ -17,7 +17,7 @@ type ProjectStore interface {
 	UpdateProject(project dt.Project)
 	GetProject(id string) (*dt.Project, error)
 	GetProjects() []dt.Project
-	DeleteProject() []dt.Project
+	DeleteProject(id string) error
 }
 
 type VersionStore interface {

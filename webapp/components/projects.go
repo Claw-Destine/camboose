@@ -21,17 +21,26 @@ type ProjectHandler struct {
 func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	urlPart := strings.Split(r.URL.Path, "/")
-
 	pid := urlPart[len(urlPart)-1]
 
-	p, err := ph.projectManager.GetProjectById(pid)
-	if err != nil {
-		slog.Error("Failed to fetch project", "id", pid, "error", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	switch r.Method {
+	case "GET":
+		p, err := ph.projectManager.GetProjectById(pid)
+		if err != nil {
+			slog.Error("Failed to fetch project", "id", pid, "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 
+		}
+
+		projectComponent(*p).Render(r.Context(), w)
+	case "DELETE":
+		err := ph.projectManager.DeleteProject(pid)
+		if err != nil {
+			slog.Error("Failed to delete project", "id", pid, "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			projectsComponent(ph.projectManager.ListProjects(), dt.Project{}).Render(r.Context(), w)
+		}
 	}
-
-	projectComponent(*p).Render(r.Context(), w)
 }
 
 func NewProjectsHandler(pm *pm.ProjectManager) ProjectsHandler {
@@ -55,9 +64,17 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		slog.Info("Create project", "name", pname)
 	case "GET":
-		pname := r.URL.Query().Get("project")
-		p = dt.Project{ObjectId: "123", Name: pname}
+		id := r.URL.Query().Get("project")
+		if id != "" {
+			pp, err := ph.projectManager.GetProjectById(id)
+			p = *pp
+			if err != nil {
+				slog.Error("Requested unknown project", "id", id)
+			}
+		}
 		print(r.Method)
+	default:
+		slog.Error("Unknown method", "method", r.Method)
 	}
 	projectsComponent(ph.projectManager.ListProjects(), p).Render(r.Context(), w)
 }

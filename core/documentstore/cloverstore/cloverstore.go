@@ -32,6 +32,14 @@ func NewCloverStoreConnection(dbname string) (ds.Store, error) {
 		return nil, err
 	}
 
+	has_idx, err := db.HasIndex(ds.COL_PROJECTS, "name")
+	if err != nil {
+		return nil, err
+	}
+	if !has_idx {
+		db.CreateIndex(ds.COL_PROJECTS, "name")
+	}
+
 	return &CloverStore{db: db}, nil
 }
 
@@ -78,9 +86,9 @@ func (cs *CloverStore) GetProjects() []dt.Project {
 	}
 	return projects
 }
-func (c *CloverStore) DeleteProject() []dt.Project {
-	return []dt.Project{}
+func (cs *CloverStore) DeleteProject(id string) error {
+	return cs.db.DeleteById(ds.COL_PROJECTS, id)
 }
-func (c *CloverStore) CreateVersion(name string, projectID string) *dt.Version {
+func (cs *CloverStore) CreateVersion(name string, projectID string) *dt.Version {
 	return &dt.Version{}
 }
