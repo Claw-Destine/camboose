@@ -38,8 +38,9 @@ func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			slog.Error("Failed to delete project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			projectsComponent(ph.projectManager.ListProjects(), dt.Project{}).Render(r.Context(), w)
+
 		}
+		projectsComponent(ph.projectManager.ListProjects(), dt.Project{}).Render(r.Context(), w)
 	}
 }
 
@@ -61,6 +62,7 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			slog.Error("Failed to create the project", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		slog.Info("Create project", "name", pname)
 	case "GET":

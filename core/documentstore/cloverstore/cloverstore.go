@@ -48,7 +48,15 @@ func (cs *CloverStore) Close() {
 }
 
 func (cs *CloverStore) CreateProject(name string) (*dt.Project, error) {
-	doc := d.NewDocument()
+	doc, err := cs.db.FindFirst(q.NewQuery(ds.COL_PROJECTS).Where(q.Field("name").Eq(name)))
+	if err != nil {
+		return nil, err
+	}
+	if doc != nil {
+		return nil, ds.StoreError{What: ds.ENTITY_EXISTS, Collection: ds.COL_PROJECTS}
+	}
+
+	doc = d.NewDocument()
 	doc.Set("name", name)
 	id, err := cs.db.InsertOne(ds.COL_PROJECTS, doc)
 	if err != nil {

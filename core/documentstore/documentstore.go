@@ -1,10 +1,27 @@
 package documentstore
 
-import dt "claw-destine.com/camboose/core/datatypes"
+import (
+	"fmt"
+
+	dt "claw-destine.com/camboose/core/datatypes"
+)
 
 const COL_PROJECTS = "projects"
 const COL_VERSION = "versions"
 const COL_TASKS = "tasks"
+
+type ErrorType string
+
+const ENTITY_EXISTS ErrorType = "Entity exists"
+
+type StoreError struct {
+	What       ErrorType
+	Collection string
+}
+
+func (e StoreError) Error() string {
+	return fmt.Sprintf("Storage error: %s, Collection: %s", e.What, e.Collection)
+}
 
 type Store interface {
 	ProjectStore
