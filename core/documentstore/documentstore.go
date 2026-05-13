@@ -2,14 +2,18 @@ package documentstore
 
 import dt "claw-destine.com/camboose/core/datatypes"
 
-type StoreFactory interface {
-	ProjectStore() *ProjectStore
-	VersionStore()
+const COL_PROJECTS = "projects"
+const COL_VERSION = "versions"
+const COL_TASKS = "tasks"
+
+type Store interface {
+	ProjectStore
+	VersionStore
 	Close()
 }
 
 type ProjectStore interface {
-	CreateProject(name string) *dt.Project
+	CreateProject(name string) (*dt.Project, error)
 	UpdateProject(project dt.Project)
 	GetProject(id string) *dt.Project
 	GetProjects() []dt.Project

@@ -31,6 +31,4 @@ go.work.sum
 # .idea/
 .vscode/
 
-# Frontend
-web/node_modules/
-web/dist/
+data/

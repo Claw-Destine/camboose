@@ -1,13 +1,13 @@
 package datatypes
 
 type Project struct {
-	Id     string
-	Name   string
-	Recipe string
+	ObjectId string `clover:"_id"`
+	Name     string `clover:"name"`
+	Recipe   string `clover:"recipe"`
 }
 
 type Version struct {
-	Id        string
+	ObjectId  string
 	Name      string
 	ProjectId string
 }

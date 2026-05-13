@@ -1,0 +1,47 @@
+package components
+
+import dt "claw-destine.com/camboose/core/datatypes"
+
+templ projectComponent(p dt.Project) {
+if p.Name != "" {
+<h1> {p.Name }</h1>
+<h2> {p.Id}</h2>
+} else {
+<h3>Select or create a new project</h3>
+}
+}
+
+
+templ projectsComponent(projects []dt.Project, currentProject dt.Project) {
+<div class="columns">
+	<div class="column is-one-fifth">
+		<nav class="panel">
+			<p class="panel-heading">Projects</p>
+			<div class="panel-block">
+				<button class="button is-link is-outlined is-fullwidth" onclick="showModal('newproject')">New
+					Project</button>
+			</div>
+			<div class="panel-block">
+				<p class="control has-icons-left">
+					<input class="input" type="text" placeholder="Search" />
+					<span class="icon is-left">
+						<i class="fas fa-search" aria-hidden="true"></i>
+					</span>
+				</p>
+
+			</div>
+			<p class="panel-tabs">
+				<a class="is-active">Last used</a>
+				<a>Last Modified</a>
+			</p>
+			for _, p := range projects {
+			<a class="panel-block" hx-get={ projectLink(p.Name) } hx-target="#project-details">{
+				p.Name }</a>
+			}
+		</nav>
+	</div>
+	<div id="project-details" class="column">
+		@projectComponent(currentProject)
+	</div>
+</div>
+}
