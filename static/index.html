@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="assets/camboose_favicon.png" />
+    <link rel="stylesheet" href="css/bulma.min.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <script src="js/htmx.min.js"></script>
+    <title>Camboose</title>
+    <script>
+        function setActiveMenu(clickedElement) {
+            const menuItems = document.querySelectorAll('#menu-list a');
+            menuItems.forEach(item => item.classList.remove('is-active'));
+            clickedElement.classList.add('is-active');
+        }
+        function showModal(elementId) {
+            const element = document.querySelectorAll("#" + elementId);
+            element.forEach(item => item.classList.add('is-active'));
+        }
+        function hideModal(elementId) {
+            const element = document.querySelectorAll("#" + elementId);
+            element.forEach(item => item.classList.remove('is-active'));
+        }
+    </script>
+</head>
+
+<body>
+    <div id="newproject" class="modal">
+        <div class="modal-background" onclick="hideModal('newproject')"></div>
+        <div class=" modal-content">
+            <div class="box">
+                <h3>Create new project</h3>
+                <!-- <form action="/components/project" method="post"> -->
+                <form hx-post="/components/projects" hx-target="#main-container"
+                    hx-on::before-request="hideModal('newproject')">
+                    <div class="field">
+                        <label class="label">Project Name</label>
+                        <input class="input" name="name" type="text" placeholder="Input project name">
+                    </div>
+                    <div class="field">
+                        <!-- <input type="submit" class="button is-link" value="Create"> -->
+                        <input type="submit" class="button is-link" value="Create">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button class=" modal-close is-large" aria-label="close" onclick="hideModal('newproject')"></button>
+    </div>
+    <div class="columns">
+        <aside class="menu column is-narrow">
+            <figure class="image is-128x128">
+                <img src="assets/camboose_logo.png" alt="logo" />
+            </figure>
+            <h1 class="title">Camboose</h1>
+            <ul class="menu-list" id="menu-list">
+                <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
+                        hx-target="#main-container">Projects</a>
+                </li>
+                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
+                        hx-target="#main-container">Tasks</a></li>
+            </ul>
+        </aside>
+        <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load"></div>
+    </div>
+</body>
+
+</html>
