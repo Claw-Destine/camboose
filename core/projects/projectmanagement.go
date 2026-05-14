@@ -2,7 +2,7 @@ package projects
 
 import (
 	dt "claw-destine.com/camboose/core/datatypes"
-	ds "claw-destine.com/camboose/core/documentstore"
+	ds "claw-destine.com/camboose/core/store"
 )
 
 type ProjectManager struct {

@@ -5,20 +5,28 @@ import (
 	"log/slog"
 	"net/http"
 
+	"claw-destine.com/camboose/core/datatypes"
 	"claw-destine.com/camboose/core/documentstore/cloverstore"
 	"claw-destine.com/camboose/core/projects"
 	cmp "claw-destine.com/camboose/webapp/components"
 	md "claw-destine.com/camboose/webapp/middleware"
 	"github.com/a-h/templ"
+	env "github.com/caarlos0/env/v11"
 )
 
 func main() {
+	cfg, err := env.ParseAs[datatypes.Config]()
+	if err != nil {
+		slog.Error("Failed to parse environmental variables")
+		log.Panic("Exiting")
+	}
+
 	// Init server and static dir
 	mux := http.NewServeMux()
 	mux.Handle("/", http.FileServer(http.Dir("./static")))
 
 	// Create controllers
-	db, err := cloverstore.NewCloverStoreConnection("data/clover-store")
+	db, err := cloverstore.NewCloverStoreConnection(cfg.DbPath)
 	if err != nil {
 		log.Fatal(err)
 	}

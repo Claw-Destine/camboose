@@ -5,7 +5,7 @@ import (
 	"os"
 
 	dt "claw-destine.com/camboose/core/datatypes"
-	ds "claw-destine.com/camboose/core/documentstore"
+	ds "claw-destine.com/camboose/core/store"
 	c "github.com/ostafen/clover/v2"
 	d "github.com/ostafen/clover/v2/document"
 	q "github.com/ostafen/clover/v2/query"
