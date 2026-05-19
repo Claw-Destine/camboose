@@ -6,6 +6,8 @@ templ projectComponent(p dt.Project) {
 if p.Name != "" {
 <h1 class="title"> {p.Name }</h1>
 <h2 class="subtitle"> {p.Id}</h2>
+<p>Created At: { p.CreatedAt.String() }</p>
+<p>Last Update: { p.UpdatedAt.String() }</p>
 <button class="button is-link" hx-delete={ projectLink(p.Id) } hx-target="#main-container">Delete</button>
 } else {
 <h3>Select or create a new project</h3>

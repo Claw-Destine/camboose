@@ -17,6 +17,7 @@ type Base struct {
 	Id        string `gorm:"primaryKey,type:uuid;default:gen_random_uuid()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Name      string
 }
 
 func (base *Base) BeforeCreate(tx *gorm.DB) error {
@@ -26,16 +27,24 @@ func (base *Base) BeforeCreate(tx *gorm.DB) error {
 
 type Project struct {
 	Base
-	Name   string
 	Recipe string
 }
 
-type Version struct {
+type SpecType int
+
+const (
+	Version            SpecType = iota
+	Story              SpecType = 1 << (4 * iota)
+	AcceptanceCryteria SpecType = 1 << (4 * iota)
+	Leaf               SpecType = 1 << (4 * iota)
+)
+
+type SpecItem struct {
 	Base
-	Id        string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
 	ProjectId string
 	Project   Project `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ParentId  *string
+	Parent    *SpecItem  `gorm:"foreignKey:ParentID",constraint:OnUpdate:CASCADE,OnDelete:CASCADE`
+	Children  []SpecItem `gorm:"foreignKey:ParentID",constraint:OnUpdate:CASCADE,OnDelete:CASCADE`
+	Type      SpecType
 }

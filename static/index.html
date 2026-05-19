@@ -70,15 +70,40 @@
                 <img src="assets/camboose_logo.png" alt="logo" />
             </figure>
             <h1 class="title">Camboose</h1>
+            <div class="field">
+                <label class="label">Active Project</label>
+                <div class="control">
+                    <div class="select">
+                        <select>
+                            <option>Select dropdown</option>
+                            <option>With options</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <ul class="menu-list" id="menu-list">
+                <p class="menu-label">Plan</p>
+                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/specs"
+                        hx-target="#main-container">Specs</a></li>
+                <p class="menu-label">Deliver</p>
+                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
+                        hx-target="#main-container">Tasks</a></li>
+                <p class="menu-label">Administration</p>
                 <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
                         hx-target="#main-container">Projects</a>
                 </li>
-                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
-                        hx-target="#main-container">Tasks</a></li>
                 <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/recipies"
                         hx-target="#main-container">Recipies</a></li>
+                <p class="menu-label">Awaiting Tasks</p>
+                <nav class="panel is-info">
+                    <p class="panel-tabs">
+                        <a class="is-active">Current project</a>
+                        <a>All</a>
+                    </p>
+                </nav>
             </ul>
+
         </aside>
         <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load"></div>
     </div>

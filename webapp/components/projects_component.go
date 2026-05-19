@@ -65,7 +65,7 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()
 		pname := r.Form.Get("name")
-		_, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Name: pname})
+		_, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
 		if err != nil {
 			slog.Error("Failed to create the project", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)

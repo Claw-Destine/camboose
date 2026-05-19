@@ -35,15 +35,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	postgres.MigrateColumns(db, &dt.Project{}, &dt.Version{})
+	postgres.MigrateDatabase(db)
 
 	projectManager := projects.ProjectManager{Db: db}
 
 	// Set up routes and inject controlers
+	mux.Handle("/components/specs", cmp.NewSpecsHandler(&projectManager))
+	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 	mux.Handle("/components/projects", cmp.NewProjectsHandler(&projectManager))
 	mux.Handle("/components/project/", cmp.NewProjectHandler(&projectManager))
 	mux.Handle("/components/recipies", cmp.NewRecipuesHandler())
-	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 
 	// Serve
 	server := &http.Server{
