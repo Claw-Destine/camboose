@@ -76,6 +76,8 @@
                 </li>
                 <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
                         hx-target="#main-container">Tasks</a></li>
+                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/recipies"
+                        hx-target="#main-container">Recipies</a></li>
             </ul>
         </aside>
         <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load"></div>

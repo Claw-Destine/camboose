@@ -5,8 +5,8 @@ import dt "claw-destine.com/camboose/core/datatypes"
 templ projectComponent(p dt.Project) {
 if p.Name != "" {
 <h1 class="title"> {p.Name }</h1>
-<h2 class="subtitle"> {p.ObjectId}</h2>
-<button class="button is-link" hx-delete={ projectLink(p.ObjectId) } hx-target="#main-container">Delete</button>
+<h2 class="subtitle"> {p.Id}</h2>
+<button class="button is-link" hx-delete={ projectLink(p.Id) } hx-target="#main-container">Delete</button>
 } else {
 <h3>Select or create a new project</h3>
 }
@@ -36,7 +36,7 @@ templ projectsComponent(projects []dt.Project, currentProject dt.Project) {
 				<a>Last Modified</a>
 			</p>
 			for _, p := range projects {
-			<a class="panel-block" hx-get={ projectLink(p.ObjectId) } hx-target="#project-details">{
+			<a class="panel-block" hx-get={ projectLink(p.Id) } hx-target="#project-details">{
 				p.Name }</a>
 			}
 		</nav>

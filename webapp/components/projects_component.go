@@ -7,7 +7,7 @@ import (
 
 	dt "claw-destine.com/camboose/core/datatypes"
 
-	pm "claw-destine.com/camboose/core/projects"
+	pm "claw-destine.com/camboose/core/controllers/projects"
 )
 
 func NewProjectHandler(pm *pm.ProjectManager) ProjectHandler {
@@ -25,7 +25,7 @@ func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		p, err := ph.projectManager.GetProjectById(pid)
+		p, err := ph.projectManager.GetProjectById(r.Context(), pid)
 		if err != nil {
 			slog.Error("Failed to fetch project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -34,13 +34,20 @@ func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		projectComponent(*p).Render(r.Context(), w)
 	case "DELETE":
-		err := ph.projectManager.DeleteProject(pid)
+		err := ph.projectManager.DeleteProject(r.Context(), pid)
 		if err != nil {
 			slog.Error("Failed to delete project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 
 		}
-		projectsComponent(ph.projectManager.ListProjects(), dt.Project{}).Render(r.Context(), w)
+		projects, err := ph.projectManager.ListProjects()
+		if err != nil {
+			slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
+		}
+		err = projectsComponent(projects, dt.Project{}).Render(r.Context(), w)
+		if err != nil {
+			slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
+		}
 	}
 }
 
@@ -58,7 +65,7 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()
 		pname := r.Form.Get("name")
-		_, err := ph.projectManager.CreateProject(pname)
+		_, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Name: pname})
 		if err != nil {
 			slog.Error("Failed to create the project", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -68,17 +75,23 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		id := r.URL.Query().Get("project")
 		if id != "" {
-			pp, err := ph.projectManager.GetProjectById(id)
+			pp, err := ph.projectManager.GetProjectById(r.Context(), id)
 			p = *pp
 			if err != nil {
 				slog.Error("Requested unknown project", "id", id)
 			}
 		}
-		print(r.Method)
 	default:
 		slog.Error("Unknown method", "method", r.Method)
 	}
-	projectsComponent(ph.projectManager.ListProjects(), p).Render(r.Context(), w)
+	projects, err := ph.projectManager.ListProjects()
+	if err != nil {
+		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
+	}
+	err = projectsComponent(projects, p).Render(r.Context(), w)
+	if err != nil {
+		slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
+	}
 }
 
 func projectLink(p string) string {
