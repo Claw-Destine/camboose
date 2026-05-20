@@ -97,7 +97,68 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div><ul class=\"menu-list\" id=\"menu-list\"><p class=\"menu-label\">Plan</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"/components/specs\" hx-target=\"#main-container\">Specs</a></li><p class=\"menu-label\">Deliver</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"/components/tasks\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Administration</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"/components/projects\" hx-target=\"#main-container\">Projects</a></li><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"/components/recipies\" hx-target=\"#main-container\">Recipies</a></li><p class=\"menu-label\">Awaiting Tasks</p></ul><nav class=\"panel is-info\"><p class=\"panel-tabs\"><a class=\"is-active\">Current project</a> <a>All</a></p></nav></aside><div id=\"main-container\" class=\"column\" hx-get=\"/components/projects\" hx-trigger=\"load\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		postfix := ""
+		if currentProject != nil {
+			postfix = "?currentProject=" + currentProject.Id
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<ul class=\"menu-list\" id=\"menu-list\"><p class=\"menu-label\">Plan</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/specs%s", postfix))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 43, Col: 119}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-target=\"#main-container\">Specs</a></li><p class=\"menu-label\">Deliver</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/tasks%s", postfix))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 46, Col: 119}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Administration</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/projects%s", postfix))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 50, Col: 74}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-target=\"#main-container\">Projects</a></li><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/recipies%s",
+			postfix))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 53, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li><p class=\"menu-label\">Awaiting Tasks</p></ul><nav class=\"panel is-info\"><p class=\"panel-tabs\"><a class=\"is-active\">Current project</a> <a>All</a></p></nav></aside><div id=\"main-container\" class=\"column\" hx-get=\"/components/projects\" hx-trigger=\"load\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

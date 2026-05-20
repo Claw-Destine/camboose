@@ -32,20 +32,26 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
                 </div>
             </div>
         </div>
-
+        {{
+        postfix := ""
+        if (currentProject != nil) {
+        postfix="?currentProject=" + currentProject.Id
+        }
+        }}
         <ul class="menu-list" id="menu-list">
             <p class="menu-label">Plan</p>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/specs"
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/specs%s", postfix)}
                     hx-target="#main-container">Specs</a></li>
             <p class="menu-label">Deliver</p>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/tasks%s", postfix)}
                     hx-target="#main-container">Tasks</a></li>
             <p class="menu-label">Administration</p>
-            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
-                    hx-target="#main-container">Projects</a>
+            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click"
+                    hx-get={fmt.Sprintf("/components/projects%s", postfix)} hx-target="#main-container">Projects</a>
             </li>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/recipies"
-                    hx-target="#main-container">Recipies</a></li>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/recipies%s",
+                    postfix)} hx-target="#main-container">Recipies</a>
+            </li>
             <p class="menu-label">Awaiting Tasks</p>
 
         </ul>
