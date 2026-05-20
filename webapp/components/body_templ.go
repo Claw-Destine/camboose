@@ -131,7 +131,7 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Administration</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Manage</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,7 +158,7 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li><p class=\"menu-label\">Awaiting Tasks</p></ul><nav class=\"panel is-info\"><p class=\"panel-tabs\"><a class=\"is-active\">Current project</a> <a>All</a></p></nav></aside><div id=\"main-container\" class=\"column\" hx-get=\"/components/projects\" hx-trigger=\"load\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li></ul></aside><div id=\"main-container\" class=\"column\" hx-get=\"/components/projects\" hx-trigger=\"load\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -47,6 +47,7 @@ type ListProjectsFilter struct {
 }
 
 func (pm *ProjectManager) ListProjects(filter *ListProjectsFilter) ([]dt.Project, error) {
+	// todo - implement filter logic
 	var projects []dt.Project
 	result := pm.Db.Find(&projects)
 	return projects, result.Error

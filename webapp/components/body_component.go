@@ -22,15 +22,28 @@ func (ph BodyComponent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	currentProjectId := r.URL.Query().Get("currentProject")
 
+	if currentProjectId == "" {
+		cookie, err := r.Cookie("project")
+		if err == nil {
+			currentProjectId = cookie.Value
+		}
+	}
+
 	if currentProjectId != "" {
 		cp, err := ph.projectManager.GetProjectById(r.Context(), currentProjectId)
 		if err != nil {
 			slog.Error("Failed to load current project", "id", currentProjectId)
 		} else {
 			currentProject = cp
+			cookie := http.Cookie{
+				Name:     "project",
+				Value:    currentProjectId,
+				SameSite: http.SameSiteLaxMode,
+			}
+
+			http.SetCookie(w, &cookie)
 		}
 	}
-
 	// First let's get last projects
 	filter := pm.ListProjectsFilter{
 		Pagination: dt.Pagination{

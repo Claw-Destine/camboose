@@ -45,22 +45,22 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
             <p class="menu-label">Deliver</p>
             <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/tasks%s", postfix)}
                     hx-target="#main-container">Tasks</a></li>
-            <p class="menu-label">Administration</p>
+            <p class="menu-label">Manage</p>
             <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click"
                     hx-get={fmt.Sprintf("/components/projects%s", postfix)} hx-target="#main-container">Projects</a>
             </li>
             <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/recipies%s",
                     postfix)} hx-target="#main-container">Recipies</a>
             </li>
-            <p class="menu-label">Awaiting Tasks</p>
+            // <p class="menu-label">Awaiting Tasks</p>
 
         </ul>
-        <nav class="panel is-info">
-            <p class="panel-tabs">
-                <a class="is-active">Current project</a>
-                <a>All</a>
-            </p>
-        </nav>
+        // <nav class="panel is-info">
+            // <p class="panel-tabs">
+                // <a class="is-active">Current project</a>
+                // <a>All</a>
+                // </p>
+            // </nav>
 
     </aside>
     <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load">
