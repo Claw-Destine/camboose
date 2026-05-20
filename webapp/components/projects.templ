@@ -21,22 +21,22 @@ templ projectsComponent(projects []dt.Project, currentProject dt.Project) {
 		<nav class="panel">
 			<p class="panel-heading">Projects</p>
 			<div class="panel-block">
-				<button class="button is-link is-outlined is-fullwidth" onclick="showModal('newproject')">New
+				<button class="button is-link is-outlined is-fullwidth" onclick="showElement('newproject')">New
 					Project</button>
 			</div>
-			<div class="panel-block">
-				<p class="control has-icons-left">
-					<input class="input" type="text" placeholder="Search" />
-					<span class="icon is-left">
-						<i class="fas fa-search" aria-hidden="true"></i>
-					</span>
-				</p>
+			// <div class="panel-block">
+				// <p class="control has-icons-left">
+					// <input class="input" type="text" placeholder="Search" />
+					// <span class="icon is-left">
+						// <i class="fas fa-search" aria-hidden="true"></i>
+						// </span>
+					// </p>
 
-			</div>
-			<p class="panel-tabs">
-				<a class="is-active">Last used</a>
-				<a>Last Modified</a>
-			</p>
+				// </div>
+			// <p class="panel-tabs">
+				// <a class="is-active">Last used</a>
+				// <a>Last Modified</a>
+				// </p>
 			for _, p := range projects {
 			<a class="panel-block" hx-get={ projectLink(p.Id) } hx-target="#project-details">{
 				p.Name }</a>

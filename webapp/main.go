@@ -40,6 +40,7 @@ func main() {
 	projectManager := projects.ProjectManager{Db: db}
 
 	// Set up routes and inject controlers
+	mux.Handle("/components/body", cmp.NewBodyHandler(&projectManager))
 	mux.Handle("/components/specs", cmp.NewSpecsHandler(&projectManager))
 	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 	mux.Handle("/components/projects", cmp.NewProjectsHandler(&projectManager))

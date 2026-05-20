@@ -41,7 +41,12 @@ func (pm *ProjectManager) DeleteProject(ctx c.Context, id string) error {
 
 }
 
-func (pm *ProjectManager) ListProjects() ([]dt.Project, error) {
+type ListProjectsFilter struct {
+	dt.Pagination
+	dt.Ordering
+}
+
+func (pm *ProjectManager) ListProjects(filter *ListProjectsFilter) ([]dt.Project, error) {
 	var projects []dt.Project
 	result := pm.Db.Find(&projects)
 	return projects, result.Error

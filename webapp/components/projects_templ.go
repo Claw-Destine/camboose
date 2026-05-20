@@ -132,7 +132,7 @@ func projectsComponent(projects []dt.Project, currentProject dt.Project) templ.C
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"columns\"><div class=\"column is-3\"><nav class=\"panel\"><p class=\"panel-heading\">Projects</p><div class=\"panel-block\"><button class=\"button is-link is-outlined is-fullwidth\" onclick=\"showModal('newproject')\">New Project</button></div><div class=\"panel-block\"><p class=\"control has-icons-left\"><input class=\"input\" type=\"text\" placeholder=\"Search\"> <span class=\"icon is-left\"><i class=\"fas fa-search\" aria-hidden=\"true\"></i></span></p></div><p class=\"panel-tabs\"><a class=\"is-active\">Last used</a> <a>Last Modified</a></p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"columns\"><div class=\"column is-3\"><nav class=\"panel\"><p class=\"panel-heading\">Projects</p><div class=\"panel-block\"><button class=\"button is-link is-outlined is-fullwidth\" onclick=\"showElement('newproject')\">New Project</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

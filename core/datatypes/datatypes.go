@@ -12,8 +12,14 @@ type Pagination struct {
 	Offset int
 }
 
+type OrderField string
+
+type Ordering struct {
+	Field     OrderField
+	Ascending bool
+}
+
 type Base struct {
-	gorm.Model
 	Id        string `gorm:"primaryKey,type:uuid;default:gen_random_uuid()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time

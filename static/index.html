@@ -15,11 +15,11 @@
             menuItems.forEach(item => item.classList.remove('is-active'));
             clickedElement.classList.add('is-active');
         }
-        function showModal(elementId) {
+        function showElement(elementId) {
             const element = document.querySelectorAll("#" + elementId);
             element.forEach(item => item.classList.add('is-active'));
         }
-        function hideModal(elementId) {
+        function hideElement(elementId) {
             const element = document.querySelectorAll("#" + elementId);
             element.forEach(item => item.classList.remove('is-active'));
         }
@@ -35,6 +35,18 @@
             const element = document.querySelectorAll("#" + elementId);
             element.forEach(item => item.classList.add('is-hidden'));
         }
+        function toggleClass(elementId, cls = "is-active") {
+            function toggleItem(item) {
+                if (item.classList.contains(cls)) {
+                    item.classList.remove(cls);
+                } else {
+                    item.classList.add(cls);
+                }
+            }
+            const element = document.querySelectorAll("#" + elementId);
+            element.forEach(item => toggleItem(item));
+
+        }
     </script>
 </head>
 
@@ -44,69 +56,28 @@
         <div id="notification-msg">Error</div>
     </div>
     <div id="newproject" class="modal">
-        <div class="modal-background" onclick="hideModal('newproject')"></div>
+        <div class="modal-background" onclick="hideElement('newproject')"></div>
         <div class=" modal-content">
             <div class="box">
                 <h3>Create new project</h3>
                 <!-- <form action="/components/project" method="post"> -->
-                <form hx-post="/components/projects" hx-target="#main-container"
-                    hx-on::before-request="hideModal('newproject')">
+                <form hx-post="/components/projects" hx-swap="outerHTML" hx-target="#main-body"
+                    hx-on::before-request="hideElement('newproject')">
                     <div class="field">
                         <label class="label">Project Name</label>
                         <input class="input" name="name" type="text" placeholder="Input project name">
                     </div>
                     <div class="field">
                         <!-- <input type="submit" class="button is-link" value="Create"> -->
-                        <input type="submit" class="button is-link" value="Create">
+                        <input type="submit" class="button is-link" value="Create"">
                     </div>
                 </form>
             </div>
         </div>
-        <button class=" modal-close is-large" aria-label="close" onclick="hideModal('newproject')"></button>
-    </div>
-    <div class="columns">
-        <aside class="menu column is-narrow">
-            <figure class="image is-128x128">
-                <img src="assets/camboose_logo.png" alt="logo" />
-            </figure>
-            <h1 class="title">Camboose</h1>
-            <div class="field">
-                <label class="label">Active Project</label>
-                <div class="control">
-                    <div class="select">
-                        <select>
-                            <option>Select dropdown</option>
-                            <option>With options</option>
-                        </select>
+        <button class=" modal-close is-large" aria-label="close" onclick="hideElement('newproject')"></button>
                     </div>
-                </div>
-            </div>
-
-            <ul class="menu-list" id="menu-list">
-                <p class="menu-label">Plan</p>
-                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/specs"
-                        hx-target="#main-container">Specs</a></li>
-                <p class="menu-label">Deliver</p>
-                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
-                        hx-target="#main-container">Tasks</a></li>
-                <p class="menu-label">Administration</p>
-                <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
-                        hx-target="#main-container">Projects</a>
-                </li>
-                <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/recipies"
-                        hx-target="#main-container">Recipies</a></li>
-                <p class="menu-label">Awaiting Tasks</p>
-                <nav class="panel is-info">
-                    <p class="panel-tabs">
-                        <a class="is-active">Current project</a>
-                        <a>All</a>
-                    </p>
-                </nav>
-            </ul>
-
-        </aside>
-        <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load"></div>
-    </div>
+                    <div class="columns" id="main-body" hx-get="/components/body" hx-trigger="load" hx-swap="outerHTML">
+                    </div>
 </body>
 
 </html>

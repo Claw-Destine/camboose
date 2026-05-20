@@ -1,0 +1,63 @@
+package components
+
+import "fmt"
+
+import dt "claw-destine.com/camboose/core/datatypes"
+
+templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
+<div class="columns" id="main-body">
+    <aside class="menu column is-narrow">
+        <figure class="image is-128x128">
+            <img src="assets/camboose_logo.png" alt="logo" />
+        </figure>
+        <h1 class="title">Camboose</h1>
+        <p class="menu-label">Current Project</p>
+        <div id="quick-project-select" class="dropdown">
+            <div class="dropdown-trigger">
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu"
+                    onclick="toggleClass('quick-project-select')">
+                    if currentProject != nil {
+                    <span>{currentProject.Name}</span>
+                    } else {
+                    <span>Select Project</span>
+                    }
+                </button>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content">
+                    for _, p := range lastProjects {
+                    <a class="dropdown-item" hx-get={fmt.Sprintf("/components/body?currentProject=%s" , p.Id)}
+                        hx-swap="outerHTML" hx-target="#main-body"> { p.Name } </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <ul class="menu-list" id="menu-list">
+            <p class="menu-label">Plan</p>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/specs"
+                    hx-target="#main-container">Specs</a></li>
+            <p class="menu-label">Deliver</p>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/tasks"
+                    hx-target="#main-container">Tasks</a></li>
+            <p class="menu-label">Administration</p>
+            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/projects"
+                    hx-target="#main-container">Projects</a>
+            </li>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get="/components/recipies"
+                    hx-target="#main-container">Recipies</a></li>
+            <p class="menu-label">Awaiting Tasks</p>
+
+        </ul>
+        <nav class="panel is-info">
+            <p class="panel-tabs">
+                <a class="is-active">Current project</a>
+                <a>All</a>
+            </p>
+        </nav>
+
+    </aside>
+    <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load">
+    </div>
+</div>
+}

@@ -1,6 +1,7 @@
 package components
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -40,7 +41,7 @@ func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 
 		}
-		projects, err := ph.projectManager.ListProjects()
+		projects, err := ph.projectManager.ListProjects(nil)
 		if err != nil {
 			slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
 		}
@@ -65,13 +66,16 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()
 		pname := r.Form.Get("name")
-		_, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
+		np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
 		if err != nil {
 			slog.Error("Failed to create the project", "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		slog.Info("Create project", "name", pname)
+		slog.Info("Create project", "name", pname, "id", np.Id)
+		http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
+		return
+
 	case "GET":
 		id := r.URL.Query().Get("project")
 		if id != "" {
@@ -84,7 +88,7 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		slog.Error("Unknown method", "method", r.Method)
 	}
-	projects, err := ph.projectManager.ListProjects()
+	projects, err := ph.projectManager.ListProjects(nil)
 	if err != nil {
 		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
 	}
