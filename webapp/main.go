@@ -38,6 +38,7 @@ func main() {
 	postgres.MigrateDatabase(db)
 
 	projectManager := projects.ProjectManager{Db: db}
+	recipiesManager := projects.RecipeManager{Conf: cfg}
 
 	// Set up routes and inject controlers
 	mux.Handle("/components/body", cmp.NewBodyHandler(&projectManager))
@@ -45,7 +46,7 @@ func main() {
 	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 	mux.Handle("/components/projects", cmp.NewProjectsHandler(&projectManager))
 	mux.Handle("/components/project/", cmp.NewProjectHandler(&projectManager))
-	mux.Handle("/components/recipies", cmp.NewRecipuesHandler())
+	mux.Handle("/components/recipies", cmp.NewRecipuesHandler(&recipiesManager))
 
 	// Serve
 	server := &http.Server{

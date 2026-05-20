@@ -1,3 +1,6 @@
 id: static_html_with_blog
 version: 1
 description: Static HTML with blog
+specHierarchy:
+- version
+- view

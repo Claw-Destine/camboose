@@ -1,5 +1,10 @@
 package components
 
-templ recipiesComponent() {
+import dt "claw-destine.com/camboose/core/datatypes"
+
+templ recipiesComponent(recipies []dt.Recipe) {
 <h1 class="title">Recipies</h1>
+for _, r := range recipies {
+<p>{ r.Id } , {r.Description} </p>
+}
 }

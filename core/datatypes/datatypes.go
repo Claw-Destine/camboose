@@ -23,7 +23,7 @@ type Base struct {
 	Id        string `gorm:"primaryKey,type:uuid;default:gen_random_uuid()"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      string
+	Name      string `gorm:"uniqueIndex:project_name_idx"`
 }
 
 func (base *Base) BeforeCreate(tx *gorm.DB) error {
@@ -53,4 +53,12 @@ type SpecItem struct {
 	Parent    *SpecItem  `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Children  []SpecItem `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Type      SpecType
+}
+
+type Recipe struct {
+	Id           string
+	Description  string
+	Version      string
+	SpecHierachy []string
+	SpecPrompt   string
 }
