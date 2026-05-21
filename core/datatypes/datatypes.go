@@ -60,5 +60,5 @@ type Recipe struct {
 	Description  string
 	Version      string
 	SpecHierachy []string
-	SpecPrompt   string
+	SpecSkill    string
 }

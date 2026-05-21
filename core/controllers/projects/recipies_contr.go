@@ -96,12 +96,12 @@ func loadRecipe(defaultId, dirPath, manifestPath string) (dt.Recipe, error) {
 		recipe.Id = defaultId
 	}
 
-	promptPath := filepath.Join(dirPath, "design.prompt.md")
-	prompt, err := os.ReadFile(promptPath)
+	skillPath := filepath.Join(dirPath, "design.skill.md")
+	skill, err := os.ReadFile(skillPath)
 	if err == nil {
-		recipe.SpecPrompt = string(prompt)
+		recipe.SpecSkill = string(skill)
 	} else if !errors.Is(err, os.ErrNotExist) {
-		return dt.Recipe{}, fmt.Errorf("read design prompt %q: %w", promptPath, err)
+		return dt.Recipe{}, fmt.Errorf("read design skill %q: %w", skillPath, err)
 	}
 
 	return recipe, nil

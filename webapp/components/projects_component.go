@@ -11,88 +11,97 @@ import (
 	pm "claw-destine.com/camboose/core/controllers/projects"
 )
 
-func NewProjectHandler(pm *pm.ProjectManager) ProjectHandler {
-	return ProjectHandler{projectManager: pm}
-}
-
-type ProjectHandler struct {
-	projectManager *pm.ProjectManager
-}
-
-func (ph ProjectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	urlPart := strings.Split(r.URL.Path, "/")
-	pid := urlPart[len(urlPart)-1]
-
-	switch r.Method {
-	case "GET":
-		p, err := ph.projectManager.GetProjectById(r.Context(), pid)
-		if err != nil {
-			slog.Error("Failed to fetch project", "id", pid, "error", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-		}
-
-		projectComponent(*p).Render(r.Context(), w)
-	case "DELETE":
-		err := ph.projectManager.DeleteProject(r.Context(), pid)
-		if err != nil {
-			slog.Error("Failed to delete project", "id", pid, "error", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-		}
-		projects, err := ph.projectManager.ListProjects(nil)
-		if err != nil {
-			slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
-		}
-		err = projectsComponent(projects, dt.Project{}).Render(r.Context(), w)
-		if err != nil {
-			slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
-		}
-	}
-}
-
-func NewProjectsHandler(pm *pm.ProjectManager) ProjectsHandler {
-	return ProjectsHandler{projectManager: pm}
+func NewProjectsHandler(pm *pm.ProjectManager, rm *pm.RecipeManager) ProjectsHandler {
+	return ProjectsHandler{projectManager: pm, recipeManager: rm}
 }
 
 type ProjectsHandler struct {
 	projectManager *pm.ProjectManager
+	recipeManager  *pm.RecipeManager
 }
 
-func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var p dt.Project
-	switch r.Method {
-	case "POST":
-		r.ParseForm()
-		pname := r.Form.Get("name")
-		np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
-		if err != nil {
-			slog.Error("Failed to create the project", "error", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		slog.Info("Create project", "name", pname, "id", np.Id)
-		http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
-		return
+type projectView int
 
-	case "GET":
-		id := r.URL.Query().Get("project")
-		if id != "" {
-			pp, err := ph.projectManager.GetProjectById(r.Context(), id)
-			p = *pp
-			if err != nil {
-				slog.Error("Requested unknown project", "id", id)
-			}
+const (
+	allProjectsView   = iota
+	singleProjectView = iota
+)
+
+func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/components/projects") {
+		ph.displayProjectView(allProjectsView, w, r)
+	} else if strings.HasPrefix(r.URL.Path, "/components/project/") {
+		switch r.Method {
+		case "GET":
+			ph.displayProjectView(singleProjectView, w, r)
+		case "POST":
+			ph.createProject(w, r)
+		case "DELETE":
+			ph.deleteProject(w, r)
+			ph.displayProjectView(allProjectsView, w, r)
+		default:
+			slog.Error("Unknown method", "method", r.Method)
+			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
 		}
-	default:
-		slog.Error("Unknown method", "method", r.Method)
+	} else {
+		slog.Error("Wrong path", "path", r.URL.Path)
+		http.Error(w, "Wrong url", http.StatusBadRequest)
 	}
+}
+
+func (ph ProjectsHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	pid := urlPart[len(urlPart)-1]
+	err := ph.projectManager.DeleteProject(r.Context(), pid)
+	if err != nil {
+		slog.Error("Failed to delete project", "id", pid, "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+
+	}
+}
+
+func (ph ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	pname := r.Form.Get("name")
+	np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
+	if err != nil {
+		slog.Error("Failed to create the project", "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	slog.Info("Create project", "name", pname, "id", np.Id)
+	http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
+}
+
+func (ph ProjectsHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
 	projects, err := ph.projectManager.ListProjects(nil)
 	if err != nil {
 		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
 	}
-	err = projectsComponent(projects, p).Render(r.Context(), w)
+
+	urlPart := strings.Split(r.URL.Path, "/")
+	pid := urlPart[len(urlPart)-1]
+
+	var p *dt.Project
+	if view == singleProjectView {
+		p, err = ph.projectManager.GetProjectById(r.Context(), pid)
+		if err != nil {
+			slog.Error("Failed to fetch project", "id", pid, "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	}
+
+	recipies, err := ph.recipeManager.ListRecipes()
+	if err != nil {
+		slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
+	}
+
+	switch view {
+	case singleProjectView:
+		err = projectComponent(p, recipies).Render(r.Context(), w)
+	case allProjectsView:
+		err = projectsComponent(projects, p, recipies).Render(r.Context(), w)
+	}
 	if err != nil {
 		slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
 	}

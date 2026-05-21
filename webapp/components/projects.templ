@@ -2,8 +2,8 @@ package components
 
 import dt "claw-destine.com/camboose/core/datatypes"
 
-templ projectComponent(p dt.Project) {
-if p.Name != "" {
+templ projectComponent(p *dt.Project, recipies []dt.Recipe) {
+if p != nil {
 <h1 class="title"> {p.Name }</h1>
 <h2 class="subtitle"> {p.Id}</h2>
 <p>Created At: { p.CreatedAt.String() }</p>
@@ -15,7 +15,7 @@ if p.Name != "" {
 }
 
 
-templ projectsComponent(projects []dt.Project, currentProject dt.Project) {
+templ projectsComponent(projects []dt.Project, currentProject *dt.Project, recipies []dt.Recipe) {
 <div class="columns">
 	<div class="column is-3">
 		<nav class="panel">
@@ -44,7 +44,7 @@ templ projectsComponent(projects []dt.Project, currentProject dt.Project) {
 		</nav>
 	</div>
 	<div id="project-details" class="column">
-		@projectComponent(currentProject)
+		@projectComponent(currentProject, recipies)
 	</div>
 </div>
 }

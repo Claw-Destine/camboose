@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import dt "claw-destine.com/camboose/core/datatypes"
 
-func projectComponent(p dt.Project) templ.Component {
+func projectComponent(p *dt.Project, recipies []dt.Recipe) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -31,7 +31,7 @@ func projectComponent(p dt.Project) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if p.Name != "" {
+		if p != nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1 class=\"title\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -111,7 +111,7 @@ func projectComponent(p dt.Project) templ.Component {
 	})
 }
 
-func projectsComponent(projects []dt.Project, currentProject dt.Project) templ.Component {
+func projectsComponent(projects []dt.Project, currentProject *dt.Project, recipies []dt.Recipe) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -173,7 +173,7 @@ func projectsComponent(projects []dt.Project, currentProject dt.Project) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = projectComponent(currentProject).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = projectComponent(currentProject, recipies).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
