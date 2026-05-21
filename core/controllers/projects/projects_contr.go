@@ -2,6 +2,8 @@ package projects
 
 import (
 	c "context"
+	"errors"
+	"fmt"
 	"log/slog"
 
 	dt "claw-destine.com/camboose/core/datatypes"
@@ -39,6 +41,31 @@ func (pm *ProjectManager) DeleteProject(ctx c.Context, id string) error {
 	}
 	return err
 
+}
+
+func (pm *ProjectManager) UpdateProject(ctx c.Context, project dt.Project) error {
+	if project.Id == "" {
+		return errors.New("project id is required")
+	}
+
+	result := pm.Db.WithContext(ctx).
+		Model(&dt.Project{}).
+		Where("id = ?", project.Id).
+		Updates(map[string]any{"recipe": project.Recipe})
+
+	if result.Error != nil {
+		slog.Warn("Failed to update project.", "id", project.Id, "recipe", project.Recipe, "error", result.Error)
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		err := fmt.Errorf("project with id %q not found", project.Id)
+		slog.Warn("Failed to update project.", "id", project.Id, "recipe", project.Recipe, "error", err)
+		return err
+	}
+
+	slog.Info("Updated project.", "id", project.Id, "recipe", project.Recipe, "rows affected", result.RowsAffected)
+	return nil
 }
 
 type ListProjectsFilter struct {

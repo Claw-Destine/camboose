@@ -1,14 +1,43 @@
 package components
 
+import "fmt"
+
 import dt "claw-destine.com/camboose/core/datatypes"
 
 templ projectComponent(p *dt.Project, recipies []dt.Recipe) {
 if p != nil {
-<h1 class="title"> {p.Name }</h1>
-<h2 class="subtitle"> {p.Id}</h2>
-<p>Created At: { p.CreatedAt.String() }</p>
-<p>Last Update: { p.UpdatedAt.String() }</p>
-<button class="button is-link" hx-delete={ projectLink(p.Id) } hx-target="#main-container">Delete</button>
+<div class="block">
+	<h1 class="title"> {p.Name }</h1>
+	<h2 class="subtitle">Id: {p.Id}</h2>
+	<p>Created At: { p.CreatedAt.String() }</p>
+	<p>Last Update: { p.UpdatedAt.String() }</p>
+	<form hx-put={ projectLink(p.Id) } hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
+		<label class="label">Recipe</label>
+		<div class="select is-primary">
+			<select name="recipe">
+				if p.Recipe == "" {
+				<option selected></option>
+				}
+				for _, r := range recipies {
+				if p.Recipe == r.Id {
+				<option selected>{ r.Id }</option>
+				} else {
+				<option>{ r.Id } </option>
+				}
+				}
+			</select>
+		</div>
+		<div class="field is-grouped"><input type="submit" class="button is-link" value="Update"></div>
+
+	</form>
+</div>
+<div class="block">
+	<nav>
+		<button class="button is-link" hx-get={fmt.Sprintf("/components/body?currentProject=%s" , p.Id)}
+			hx-swap="outerHTML" hx-target="#main-body">Set as active</button>
+		<button class="button is-link" hx-delete={ projectLink(p.Id) } hx-target="#main-container">Delete</button>
+	</nav>
+</div>
 } else {
 <h3>Select or create a new project</h3>
 }

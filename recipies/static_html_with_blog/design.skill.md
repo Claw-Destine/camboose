@@ -1,8 +1,10 @@
-# Summary
+# Design skill
+
+## Summary
 
 We are designing a simple static website for a business
 
-# Instructions
+## Instructions
 
 1. Establish what kind of business is the website for
 2. Establish company name and a business

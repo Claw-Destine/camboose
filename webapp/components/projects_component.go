@@ -36,6 +36,9 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ph.displayProjectView(singleProjectView, w, r)
 		case "POST":
 			ph.createProject(w, r)
+		case "PUT":
+			ph.updateProject(w, r)
+			ph.displayProjectView(singleProjectView, w, r)
 		case "DELETE":
 			ph.deleteProject(w, r)
 			ph.displayProjectView(allProjectsView, w, r)
@@ -47,6 +50,20 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Wrong path", "path", r.URL.Path)
 		http.Error(w, "Wrong url", http.StatusBadRequest)
 	}
+}
+
+func (ph ProjectsHandler) updateProject(_ http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	pid := urlPart[len(urlPart)-1]
+	project := dt.Project{Base: dt.Base{Id: pid}}
+
+	r.ParseForm()
+	recipe := r.Form.Get("recipe")
+	if recipe != "" {
+		project.Recipe = recipe
+	}
+
+	ph.projectManager.UpdateProject(r.Context(), project)
 }
 
 func (ph ProjectsHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
@@ -79,21 +96,32 @@ func (ph ProjectsHandler) displayProjectView(view projectView, w http.ResponseWr
 		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
 	}
 
-	urlPart := strings.Split(r.URL.Path, "/")
-	pid := urlPart[len(urlPart)-1]
-
+	var pid string
 	var p *dt.Project
-	if view == singleProjectView {
+
+	switch view {
+	case singleProjectView:
+		urlPart := strings.Split(r.URL.Path, "/")
+		pid = urlPart[len(urlPart)-1]
+
+	case allProjectsView:
+		pid = r.URL.Query().Get("currentProject")
+	}
+
+	if pid != "" {
 		p, err = ph.projectManager.GetProjectById(r.Context(), pid)
 		if err != nil {
 			slog.Error("Failed to fetch project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 	}
 
 	recipies, err := ph.recipeManager.ListRecipes()
 	if err != nil {
 		slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	switch view {
