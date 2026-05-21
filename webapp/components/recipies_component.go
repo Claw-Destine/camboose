@@ -7,15 +7,15 @@ import (
 	"claw-destine.com/camboose/core/controllers/projects"
 )
 
-func NewRecipuesHandler(recipeManager *projects.RecipeManager) RecipiesHandler {
-	return RecipiesHandler{recipeManager: recipeManager}
+func NewRecipuesHandler(recipeManager *projects.RecipeController) RecipiesCompHandler {
+	return RecipiesCompHandler{recipeManager: recipeManager}
 }
 
-type RecipiesHandler struct {
-	recipeManager *projects.RecipeManager
+type RecipiesCompHandler struct {
+	recipeManager *projects.RecipeController
 }
 
-func (ph RecipiesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ph RecipiesCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	recipies, err := ph.recipeManager.ListRecipes()
 	if err != nil {

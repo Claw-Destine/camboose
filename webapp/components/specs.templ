@@ -1,5 +1,14 @@
 package components
 
-templ specsComponent() {
-<h2>Specs</h2>
+import dt "claw-destine.com/camboose/core/datatypes"
+
+
+templ specsComponent(currentProject *dt.Project) {
+if currentProject == nil {
+<div class="notification is-info">
+    Select of create a project.
+</div>
+} else {
+<h1>Specs</h1>
+}
 }

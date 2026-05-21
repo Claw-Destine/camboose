@@ -105,14 +105,14 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if currentProject != nil {
 			postfix = "?currentProject=" + currentProject.Id
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<ul class=\"menu-list\" id=\"menu-list\"><p class=\"menu-label\">Plan</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<ul class=\"menu-list\" id=\"menu-list\"><p class=\"menu-label\">Plan</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/specs%s", postfix))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 43, Col: 119}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 44, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -131,14 +131,15 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Manage</p><li><a class=\"is-active\" onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-target=\"#main-container\">Tasks</a></li><p class=\"menu-label\">Manage</p><li><a onclick=\"setActiveMenu(this)\" hx-trigger=\"click\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/projects%s", postfix))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/projects%s",
+			postfix))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 50, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 50, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -158,7 +159,15 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li></ul></aside><div id=\"main-container\" class=\"column\" hx-get=\"/components/projects\" hx-trigger=\"load\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li></ul></aside><div id=\"main-container\" class=\"column\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = specsComponent(currentProject).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

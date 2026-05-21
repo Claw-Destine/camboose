@@ -11,11 +11,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type RecipeManager struct {
+type RecipeController struct {
 	Conf dt.Config
 }
 
-func (rm *RecipeManager) ListRecipes() ([]dt.Recipe, error) {
+func (rm *RecipeController) ListRecipes() ([]dt.Recipe, error) {
 	entries, err := os.ReadDir(rm.Conf.RecipePath)
 	if err != nil {
 		return nil, fmt.Errorf("read recipes directory %q: %w", rm.Conf.RecipePath, err)

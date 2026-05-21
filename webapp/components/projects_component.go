@@ -11,13 +11,13 @@ import (
 	pm "claw-destine.com/camboose/core/controllers/projects"
 )
 
-func NewProjectsHandler(pm *pm.ProjectManager, rm *pm.RecipeManager) ProjectsHandler {
-	return ProjectsHandler{projectManager: pm, recipeManager: rm}
+func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
+	return ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 }
 
-type ProjectsHandler struct {
-	projectManager *pm.ProjectManager
-	recipeManager  *pm.RecipeManager
+type ProjectsCompHandler struct {
+	projectManager *pm.ProjectControler
+	recipeManager  *pm.RecipeController
 }
 
 type projectView int
@@ -27,7 +27,7 @@ const (
 	singleProjectView = iota
 )
 
-func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
 	} else if strings.HasPrefix(r.URL.Path, "/components/project/") {
@@ -52,7 +52,7 @@ func (ph ProjectsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ph ProjectsHandler) updateProject(_ http.ResponseWriter, r *http.Request) {
+func (ph ProjectsCompHandler) updateProject(_ http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
 	pid := urlPart[len(urlPart)-1]
 	project := dt.Project{Base: dt.Base{Id: pid}}
@@ -66,7 +66,7 @@ func (ph ProjectsHandler) updateProject(_ http.ResponseWriter, r *http.Request) 
 	ph.projectManager.UpdateProject(r.Context(), project)
 }
 
-func (ph ProjectsHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
+func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
 	pid := urlPart[len(urlPart)-1]
 	err := ph.projectManager.DeleteProject(r.Context(), pid)
@@ -77,7 +77,7 @@ func (ph ProjectsHandler) deleteProject(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (ph ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) {
+func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	pname := r.Form.Get("name")
 	np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
@@ -90,10 +90,12 @@ func (ph ProjectsHandler) createProject(w http.ResponseWriter, r *http.Request) 
 	http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
 }
 
-func (ph ProjectsHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
+func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
 	projects, err := ph.projectManager.ListProjects(nil)
 	if err != nil {
 		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	var pid string

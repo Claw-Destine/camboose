@@ -8,15 +8,15 @@ import (
 	dt "claw-destine.com/camboose/core/datatypes"
 )
 
-func NewBodyHandler(pm *pm.ProjectManager) BodyComponent {
-	return BodyComponent{projectManager: pm}
+func NewBodyHandler(pm *pm.ProjectControler) BodyCompHandler {
+	return BodyCompHandler{projectManager: pm}
 }
 
-type BodyComponent struct {
-	projectManager *pm.ProjectManager
+type BodyCompHandler struct {
+	projectManager *pm.ProjectControler
 }
 
-func (ph BodyComponent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var currentProject *dt.Project
 

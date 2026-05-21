@@ -37,8 +37,8 @@ func main() {
 	}
 	postgres.MigrateDatabase(db)
 
-	projectManager := projects.ProjectManager{Db: db}
-	recipiesManager := projects.RecipeManager{Conf: cfg}
+	projectManager := projects.ProjectControler{Db: db}
+	recipiesManager := projects.RecipeController{Conf: cfg}
 
 	projectsHandler := cmp.NewProjectsHandler(&projectManager, &recipiesManager)
 

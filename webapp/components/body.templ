@@ -40,14 +40,14 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
         }}
         <ul class="menu-list" id="menu-list">
             <p class="menu-label">Plan</p>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/specs%s", postfix)}
-                    hx-target="#main-container">Specs</a></li>
+            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click"
+                    hx-get={fmt.Sprintf("/components/specs%s", postfix)} hx-target="#main-container">Specs</a></li>
             <p class="menu-label">Deliver</p>
             <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/tasks%s", postfix)}
                     hx-target="#main-container">Tasks</a></li>
             <p class="menu-label">Manage</p>
-            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click"
-                    hx-get={fmt.Sprintf("/components/projects%s", postfix)} hx-target="#main-container">Projects</a>
+            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/projects%s",
+                    postfix)} hx-target="#main-container">Projects</a>
             </li>
             <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/recipies%s",
                     postfix)} hx-target="#main-container">Recipies</a>
@@ -63,7 +63,8 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
             // </nav>
 
     </aside>
-    <div id="main-container" class="column" hx-get="/components/projects" hx-trigger="load">
+    <div id="main-container" class="column">
+        @specsComponent(currentProject)
     </div>
 </div>
 }
