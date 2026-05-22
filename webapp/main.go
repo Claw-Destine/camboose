@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"claw-destine.com/camboose/core/controllers/projects"
+	"claw-destine.com/camboose/core/controllers/specs"
 	"claw-destine.com/camboose/core/database/postgres"
 	dt "claw-destine.com/camboose/core/datatypes"
 	cmp "claw-destine.com/camboose/webapp/components"
@@ -37,18 +38,22 @@ func main() {
 	}
 	postgres.MigrateDatabase(db)
 
-	projectManager := projects.ProjectControler{Db: db}
-	recipiesManager := projects.RecipeController{Conf: cfg}
+	projectsCtl := projects.ProjectControler{Db: db}
+	recipiesCtl := projects.RecipeController{Conf: cfg}
+	specsCtl := specs.SpecsController{Db: db}
 
-	projectsHandler := cmp.NewProjectsHandler(&projectManager, &recipiesManager)
+	projectsHandler := cmp.NewProjectsHandler(&projectsCtl, &recipiesCtl)
+	specsHandler := cmp.NewSpecsHandler(&projectsCtl, &specsCtl)
 
 	// Set up routes and inject controlers
-	mux.Handle("/components/body", cmp.NewBodyHandler(&projectManager))
-	mux.Handle("/components/specs", cmp.NewSpecsHandler(&projectManager))
+	mux.Handle("/components/body", cmp.NewBodyHandler(&projectsCtl))
+	mux.Handle("/components/specs", specsHandler)
+	mux.Handle("/components/version", specsHandler)
+	mux.Handle("/components/versions", specsHandler)
 	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 	mux.Handle("/components/projects", projectsHandler)
 	mux.Handle("/components/project/", projectsHandler)
-	mux.Handle("/components/recipies", cmp.NewRecipuesHandler(&recipiesManager))
+	mux.Handle("/components/recipies", cmp.NewRecipuesHandler(&recipiesCtl))
 
 	// Serve
 	server := &http.Server{

@@ -10,7 +10,7 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
         <figure class="image is-128x128">
             <img src="assets/camboose_logo.png" alt="logo" />
         </figure>
-        <h1 class="title">Camboose</h1>
+        <h1 class="title">camboose</h1>
         <p class="menu-label">Current Project</p>
         <div id="quick-project-select" class="dropdown">
             <div class="dropdown-trigger">
@@ -63,8 +63,7 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
             // </nav>
 
     </aside>
-    <div id="main-container" class="column">
-        @specsComponent(currentProject)
+    <div id="main-container" class="column" hx-get={fmt.Sprintf("/components/specs%s", postfix)} hx-trigger="load">
     </div>
 </div>
 }

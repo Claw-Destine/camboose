@@ -47,10 +47,8 @@ const (
 
 type SpecItem struct {
 	Base
-	ProjectId string
-	Project   Project `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	ParentId  *string
-	Parent    *SpecItem  `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ProjectId string     `gorm:"constraint:OnUpdate:CqASCADE,OnDelete:CASCADE;"`
+	ParentId  *string    `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Children  []SpecItem `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Type      SpecType
 }

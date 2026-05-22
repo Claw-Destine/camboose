@@ -33,7 +33,7 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"columns\" id=\"main-body\"><aside class=\"menu column is-narrow\"><figure class=\"image is-128x128\"><img src=\"assets/camboose_logo.png\" alt=\"logo\"></figure><h1 class=\"title\">Camboose</h1><p class=\"menu-label\">Current Project</p><div id=\"quick-project-select\" class=\"dropdown\"><div class=\"dropdown-trigger\"><button class=\"button\" aria-haspopup=\"true\" aria-controls=\"dropdown-menu\" onclick=\"toggleClass('quick-project-select')\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"columns\" id=\"main-body\"><aside class=\"menu column is-narrow\"><figure class=\"image is-128x128\"><img src=\"assets/camboose_logo.png\" alt=\"logo\"></figure><h1 class=\"title\">camboose</h1><p class=\"menu-label\">Current Project</p><div id=\"quick-project-select\" class=\"dropdown\"><div class=\"dropdown-trigger\"><button class=\"button\" aria-haspopup=\"true\" aria-controls=\"dropdown-menu\" onclick=\"toggleClass('quick-project-select')\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,15 +159,20 @@ func bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li></ul></aside><div id=\"main-container\" class=\"column\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target=\"#main-container\">Recipies</a></li></ul></aside><div id=\"main-container\" class=\"column\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = specsComponent(currentProject).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/components/specs%s", postfix))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/body.templ`, Line: 66, Col: 95}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-trigger=\"load\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
