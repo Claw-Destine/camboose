@@ -45,7 +45,7 @@ func setupTestDB(t *testing.T) (*gorm.DB, func()) {
 	if err != nil {
 		t.Fatalf("failed to connect to db: %v", err)
 	}
-	if err := db.AutoMigrate(&dt.Project{}, &dt.SpecItem{}); err != nil {
+	if err := db.AutoMigrate(&dt.Project{}, &dt.Version{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
 	cleanup := func() {
@@ -61,7 +61,7 @@ func TestSpecsController_CRUD(t *testing.T) {
 	project := dt.Project{Base: dt.Base{Name: "Test Project"}, Recipe: "test-recipe"}
 	assert.NoError(t, db.Create(&project).Error)
 
-	si := dt.SpecItem{Base: dt.Base{Name: "Spec1"}, ProjectId: project.Id, Type: dt.Version}
+	si := dt.Version{Base: dt.Base{Name: "Spec1"}, ProjectId: project.Id, Type: dt.Version}
 	created, err := sc.CreateSpecItem(si)
 	assert.NoError(t, err)
 	assert.NotNil(t, created)

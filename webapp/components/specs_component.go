@@ -24,7 +24,7 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	var p *dt.Project
 	var err error
-	var si []dt.SpecItem
+	var si []dt.Version
 
 	pid := r.URL.Query().Get("currentProject")
 
@@ -63,7 +63,8 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, appendQueryParams("/components/versions", paramCurrentProjec, pid), http.StatusSeeOther)
 		case http.MethodDelete:
 			sh.deleteVersion(r)
-			io.WriteString(w, " \n")
+			// Return empty string for swap
+			io.WriteString(w, "")
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -74,18 +75,18 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func (sh SpecsCompHandler) displaySpecsPage(p *dt.Project, si []dt.SpecItem, w http.ResponseWriter, r *http.Request) {
+func (sh SpecsCompHandler) displaySpecsPage(p *dt.Project, si []dt.Version, w http.ResponseWriter, r *http.Request) {
 	specsComponent(p, si).Render(r.Context(), w)
 }
 
-func (sh SpecsCompHandler) displayVersionList(si []dt.SpecItem, w http.ResponseWriter, r *http.Request) {
+func (sh SpecsCompHandler) displayVersionList(si []dt.Version, w http.ResponseWriter, r *http.Request) {
 	versionList(si).Render(r.Context(), w)
 }
 
 func (sh SpecsCompHandler) createVersion(project dt.Project, r *http.Request) {
 	r.ParseForm()
 	version_name := r.Form.Get("name")
-	s := dt.SpecItem{Type: dt.Version, ProjectId: project.Id}
+	s := dt.Version{ProjectId: project.Id}
 	s.Name = version_name
 	sh.specsCtl.CreateSpecItem(s)
 }

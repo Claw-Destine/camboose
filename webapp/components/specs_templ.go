@@ -5,12 +5,14 @@ package components
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
+import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 
-import dt "claw-destine.com/camboose/core/datatypes"
+	dt "claw-destine.com/camboose/core/datatypes"
+)
 
-func specsComponent(currentProject *dt.Project, si []dt.SpecItem) templ.Component {
+func specsComponent(currentProject *dt.Project, si []dt.Version) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -50,7 +52,7 @@ func specsComponent(currentProject *dt.Project, si []dt.SpecItem) templ.Componen
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-target=\"#versionlist-container\"><div class=\"container is-fluid\"><b>Create a new version:</b> <label class=\"cbs_hform_item\" for=\"version_name\">Name</label> <input class=\"cbs_hform_item\" type=\"text\" id=\"version_name\" name=\"name\"> <input class=\"cbs_hform_item\" type=\"submit\" value=\"create\"></div></form></div><div class=\"box cbs_vfull\" id=\"versionlist-container\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-target=\"#versionlist-container\"><div class=\"container is-fluid\"><b>Create a new version / epic:</b> <label class=\"cbs_hform_item\" for=\"version_name\">Name</label> <input class=\"cbs_hform_item\" type=\"text\" id=\"version_name\" name=\"name\"> <input class=\"cbs_hform_item\" type=\"submit\" value=\"create\"></div></form></div><div class=\"box cbs_vfull\" id=\"versionlist-container\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -67,7 +69,7 @@ func specsComponent(currentProject *dt.Project, si []dt.SpecItem) templ.Componen
 	})
 }
 
-func versionList(si []dt.SpecItem) templ.Component {
+func versionList(si []dt.Version) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -98,7 +100,7 @@ func versionList(si []dt.SpecItem) templ.Component {
 	})
 }
 
-func versionItem(si dt.SpecItem) templ.Component {
+func versionItem(si dt.Version) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
