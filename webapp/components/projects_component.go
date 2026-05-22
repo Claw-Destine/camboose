@@ -28,6 +28,7 @@ const (
 )
 
 func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Order matters
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
 	} else if strings.HasPrefix(r.URL.Path, "/components/project/") {

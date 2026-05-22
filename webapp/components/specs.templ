@@ -13,10 +13,10 @@ if currentProject == nil {
 <div class="box">
     <form hx-post={ appendQueryParams("/components/version", paramCurrentProjec, currentProject.Id )}
         hx-target="#versionlist-container">
-        <div class="container is-fullhd">
-            <label class="cbs_hform_item"><b>Create a new version:</b></label>
+        <div class="container is-fluid">
+            <b>Create a new version:</b>
             <label class="cbs_hform_item" for="version_name">Name</label>
-            <input class="cbs_hform_item" type="text" id="version_name" name="version_name">
+            <input class="cbs_hform_item" type="text" id="version_name" name="name">
             <input class="cbs_hform_item" type="submit" value="create">
         </div>
     </form>
@@ -29,8 +29,14 @@ if currentProject == nil {
 
 templ versionList(si []dt.SpecItem) {
 for _, s := range si {
-<div class="box ">
-    <p>{ s.Name }</p>
-</div>
+@versionItem(s)
 }
+}
+
+templ versionItem(si dt.SpecItem) {
+<div id={ "ver_" + si.Id} class="box container is-fluid">
+    <b>{ si.Name }</b>
+    <button class="delete is-pulled-right" hx-confirm="This will permanently delete the version. Are you sure?"
+        hx-delete={"/components/version/" + si.Id } hx-swap="outerHTML" hx-target={ "#ver_" + si.Id}></button>
+</div>
 }

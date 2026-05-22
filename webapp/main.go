@@ -48,7 +48,7 @@ func main() {
 	// Set up routes and inject controlers
 	mux.Handle("/components/body", cmp.NewBodyHandler(&projectsCtl))
 	mux.Handle("/components/specs", specsHandler)
-	mux.Handle("/components/version", specsHandler)
+	mux.Handle("/components/version/", specsHandler)
 	mux.Handle("/components/versions", specsHandler)
 	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
 	mux.Handle("/components/projects", projectsHandler)
