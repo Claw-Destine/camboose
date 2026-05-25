@@ -68,14 +68,57 @@ func (pm *ProjectControler) UpdateProject(ctx c.Context, project dt.Project) err
 	return nil
 }
 
-type ListProjectsFilter struct {
-	dt.Pagination
-	dt.Ordering
+func (pm *ProjectControler) ProjectStatistics(projects any) (map[string]map[dt.RequirementStatus]int, error) {
+	var projectIDs []string
+	switch pp := projects.(type) {
+	case []string:
+		projectIDs = pp
+	case []dt.Project:
+		projectIDs = make([]string, len(pp))
+		for _, p := range pp {
+			projectIDs = append(projectIDs, p.Id)
+		}
+	default:
+		slog.Error("ProjectStatistics method accepts only []string and []Project")
+		return nil, &dt.WrongTypeError{What: "ProjectStatistics method accepts only []string and []Project"}
+	}
+
+	type versionCountRow struct {
+		ProjectId string
+		Status    dt.RequirementStatus
+		Count     int
+	}
+
+	var versionCounts []versionCountRow
+
+	if err := pm.Db.Model(&dt.Version{}).
+		Select("project_id, status, COUNT(*) as count").
+		Where("project_id IN ?", projectIDs).
+		Group("project_id, status").
+		Scan(&versionCounts).Error; err != nil {
+		return nil, err
+	}
+
+	countsByProject := make(map[string]map[dt.RequirementStatus]int, len(projectIDs))
+	for _, row := range versionCounts {
+		if _, ok := countsByProject[row.ProjectId]; !ok {
+			countsByProject[row.ProjectId] = make(map[dt.RequirementStatus]int)
+		}
+		countsByProject[row.ProjectId][row.Status] = row.Count
+	}
+	return countsByProject, nil
 }
 
-func (pm *ProjectControler) ListProjects(filter *ListProjectsFilter) ([]dt.Project, error) {
-	// todo - implement filter logic
+func (pm *ProjectControler) ListProjects(filter *dt.QuerySettings) ([]dt.Project, error) {
 	var projects []dt.Project
 	result := pm.Db.Find(&projects)
-	return projects, result.Error
+	if result.Error != nil {
+		return projects, result.Error
+	}
+
+	if len(projects) == 0 {
+		return projects, nil
+	}
+
+	return projects, nil
 }

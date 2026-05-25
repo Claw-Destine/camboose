@@ -1,4 +1,4 @@
-package specs
+package projects
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupTestDB(t *testing.T) (*gorm.DB, func()) {
+func setupProjectsTestDB(t *testing.T) (*gorm.DB, func()) {
 	ctx := context.Background()
 	_, filename, _, _ := runtime.Caller(0)
 	initScriptPath := filepath.Join(filepath.Dir(filename), "../../../init.sql")
@@ -54,34 +54,40 @@ func setupTestDB(t *testing.T) (*gorm.DB, func()) {
 	return db, cleanup
 }
 
-func TestSpecsController_CRUD(t *testing.T) {
-	db, cleanup := setupTestDB(t)
+func TestListProjects_IncludesVersionCountsGroupedByStatus(t *testing.T) {
+	db, cleanup := setupProjectsTestDB(t)
 	defer cleanup()
-	sc := &SpecsController{Db: db}
-	project := dt.Project{Base: dt.Base{Name: "Test Project"}, Recipe: "test-recipe"}
-	assert.NoError(t, db.Create(&project).Error)
 
-	si := dt.Version{Base: dt.Base{Name: "Spec1"}, ProjectId: project.Id}
-	created, err := sc.CreateVersion(si)
-	assert.NoError(t, err)
-	assert.NotNil(t, created)
-	assert.Equal(t, "Spec1", created.Name)
+	pc := &ProjectControler{Db: db}
 
-	fetched, err := sc.GetVersionById(created.Id)
-	assert.NoError(t, err)
-	assert.Equal(t, created.Id, fetched.Id)
+	project1 := dt.Project{Base: dt.Base{Name: "Project 1"}}
+	project2 := dt.Project{Base: dt.Base{Name: "Project 2"}}
+	project3 := dt.Project{Base: dt.Base{Name: "Project 3"}}
+	assert.NoError(t, db.Create(&project1).Error)
+	assert.NoError(t, db.Create(&project2).Error)
+	assert.NoError(t, db.Create(&project3).Error)
 
-	created.Name = "Spec1 Updated"
-	updated, err := sc.UpdateVersion(*created)
-	assert.NoError(t, err)
-	assert.Equal(t, "Spec1 Updated", updated.Name)
+	versions := []dt.Version{
+		{Base: dt.Base{Name: "v1"}, ProjectId: project1.Id, Status: dt.RS_New},
+		{Base: dt.Base{Name: "v2"}, ProjectId: project1.Id, Status: dt.RS_New},
+		{Base: dt.Base{Name: "v3"}, ProjectId: project1.Id, Status: dt.RS_Done},
+		{Base: dt.Base{Name: "v4"}, ProjectId: project2.Id, Status: dt.RS_InReview},
+	}
+	for _, v := range versions {
+		assert.NoError(t, db.Create(&v).Error)
+	}
 
-	list, err := sc.ListVersions(project.Id)
+	projects, err := pc.ListProjects(nil)
 	assert.NoError(t, err)
-	assert.Len(t, list, 1)
+	assert.Len(t, projects, 3)
 
-	assert.NoError(t, sc.DeleteVersionById(created.Id))
-	list, err = sc.ListVersions(project.Id)
-	assert.NoError(t, err)
-	assert.Len(t, list, 0)
+	byID := map[string]dt.Project{}
+	for _, p := range projects {
+		byID[p.Id] = p
+	}
+
+	assert.Equal(t, 2, byID[project1.Id].VersionStatusCounts[dt.RS_New])
+	assert.Equal(t, 1, byID[project1.Id].VersionStatusCounts[dt.RS_Done])
+	assert.Equal(t, 1, byID[project2.Id].VersionStatusCounts[dt.RS_InReview])
+	assert.Empty(t, byID[project3.Id].VersionStatusCounts)
 }

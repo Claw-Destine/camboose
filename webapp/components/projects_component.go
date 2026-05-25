@@ -118,6 +118,13 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		stats, err := ph.projectManager.ProjectStatistics([]string{pid})
+		if err != nil {
+			if err != nil {
+				slog.Error("Failed to stats for project", "id", pid, "error", err)
+			}
+		}
+		p.VersionStatusCounts = stats[pid]
 	}
 
 	recipies, err := ph.recipeManager.ListRecipes()

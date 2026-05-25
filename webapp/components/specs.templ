@@ -3,7 +3,7 @@ package components
 import dt "claw-destine.com/camboose/core/datatypes"
 
 
-templ specsComponent(currentProject *dt.Project, si []dt.SpecItem) {
+templ specsComponent(currentProject *dt.Project, si []dt.Version) {
 if currentProject == nil {
 <div class="notification is-info">
     Select of create a project.
@@ -27,13 +27,13 @@ if currentProject == nil {
 }
 }
 
-templ versionList(si []dt.SpecItem) {
+templ versionList(si []dt.Version) {
 for _, s := range si {
 @versionItem(s)
 }
 }
 
-templ versionItem(si dt.SpecItem) {
+templ versionItem(si dt.Version) {
 <div id={ "ver_" + si.Id} class="box container is-fluid">
     <b>{ si.Name }</b>
     <button class="delete is-pulled-right" hx-confirm="This will permanently delete the version. Are you sure?"

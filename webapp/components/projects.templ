@@ -11,6 +11,10 @@ if p != nil {
 	<h2 class="subtitle">Id: {p.Id}</h2>
 	<p>Created At: { p.CreatedAt.String() }</p>
 	<p>Last Update: { p.UpdatedAt.String() }</p>
+	<h2 class="subtitle">Versions:</h2>
+	for _, st := range dt.ALL_RS{
+	<p>{ st } : { p.VersionStatusCounts[st]}</p>
+	}
 	<form hx-put={ projectLink(p.Id) } hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
 		<label class="label">Recipe</label>
 		<div class="select is-primary">

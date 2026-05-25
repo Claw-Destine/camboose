@@ -9,13 +9,13 @@ type SpecsController struct {
 	Db *gorm.DB
 }
 
-func (sc *SpecsController) ListSpecItems(projectId string) ([]dt.Version, error) {
+func (sc *SpecsController) ListVersions(projectId string) ([]dt.Version, error) {
 	var items []dt.Version
 	err := sc.Db.Where("project_id = ?", projectId).Find(&items).Error
 	return items, err
 }
 
-func (sc *SpecsController) GetSpecItemById(id string) (*dt.Version, error) {
+func (sc *SpecsController) GetVersionById(id string) (*dt.Version, error) {
 	var item dt.Version
 	err := sc.Db.First(&item, "id = ?", id).Error
 	if err != nil {
@@ -24,7 +24,7 @@ func (sc *SpecsController) GetSpecItemById(id string) (*dt.Version, error) {
 	return &item, nil
 }
 
-func (sc *SpecsController) CreateSpecItem(si dt.Version) (*dt.Version, error) {
+func (sc *SpecsController) CreateVersion(si dt.Version) (*dt.Version, error) {
 	if si.Id == "" {
 		si.Id = ""
 	}
@@ -35,7 +35,7 @@ func (sc *SpecsController) CreateSpecItem(si dt.Version) (*dt.Version, error) {
 	return &si, nil
 }
 
-func (sc *SpecsController) UpdateSpecItem(si dt.Version) (*dt.Version, error) {
+func (sc *SpecsController) UpdateVersion(si dt.Version) (*dt.Version, error) {
 	err := sc.Db.Save(&si).Error
 	if err != nil {
 		return nil, err
@@ -43,6 +43,6 @@ func (sc *SpecsController) UpdateSpecItem(si dt.Version) (*dt.Version, error) {
 	return &si, nil
 }
 
-func (sc *SpecsController) DeleteSpecItemById(id string) error {
+func (sc *SpecsController) DeleteVersionById(id string) error {
 	return sc.Db.Delete(&dt.Version{}, "id = ?", id).Error
 }

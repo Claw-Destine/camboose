@@ -45,14 +45,11 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// First let's get last projects
-	filter := pm.ListProjectsFilter{
-		Pagination: dt.Pagination{
-			Limit:  5,
-			Offset: 0,
-		},
-		Ordering: dt.Ordering{
-			Field: "updated_at",
-		},
+	filter := dt.QuerySettings{
+		Limit:       5,
+		Offset:      0,
+		OrderFields: []string{"updated_at"},
+		Ascending:   false,
 	}
 	lastProjects, error := ph.projectManager.ListProjects(&filter)
 

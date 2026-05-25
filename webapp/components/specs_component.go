@@ -35,7 +35,7 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		si, err = sh.specsCtl.ListSpecItems(p.Id)
+		si, err = sh.specsCtl.ListVersions(p.Id)
 	}
 
 	if strings.HasPrefix(r.URL.Path, "/components/specs") {
@@ -88,11 +88,11 @@ func (sh SpecsCompHandler) createVersion(project dt.Project, r *http.Request) {
 	version_name := r.Form.Get("name")
 	s := dt.Version{ProjectId: project.Id}
 	s.Name = version_name
-	sh.specsCtl.CreateSpecItem(s)
+	sh.specsCtl.CreateVersion(s)
 }
 
 func (sh SpecsCompHandler) deleteVersion(r *http.Request) {
 	urlPart := strings.Split(r.URL.Path, "/")
 	vid := urlPart[len(urlPart)-1]
-	sh.specsCtl.DeleteSpecItemById(vid)
+	sh.specsCtl.DeleteVersionById(vid)
 }

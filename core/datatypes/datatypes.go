@@ -19,6 +19,21 @@ type Ordering struct {
 	Ascending bool
 }
 
+type QuerySettings struct {
+	Limit       int
+	Offset      int
+	Ascending   bool
+	OrderFields []string
+}
+
+func DefaultQuerySettings() QuerySettings {
+	return QuerySettings{
+		Limit:     -1,
+		Offset:    -1,
+		Ascending: false,
+	}
+}
+
 type Recipe struct {
 	Id           string
 	Description  string
@@ -28,11 +43,10 @@ type Recipe struct {
 }
 
 type Base struct {
-	Id          string `gorm:"primaryKey,type:uuid;default:gen_random_uuid()"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Name        string `gorm:"uniqueIndex:project_name_idx"`
-	Description string
+	Id        string `gorm:"primaryKey,type:uuid;default:gen_random_uuid()"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string `gorm:"uniqueIndex:project_name_idx"`
 }
 
 func (base *Base) BeforeCreate(tx *gorm.DB) error {
@@ -42,7 +56,9 @@ func (base *Base) BeforeCreate(tx *gorm.DB) error {
 
 type Project struct {
 	Base
-	Recipe string
+	Description         string
+	Recipe              string
+	VersionStatusCounts map[RequirementStatus]int `gorm:"-"`
 }
 
 type RequirementStatus string
@@ -53,16 +69,20 @@ const RS_InProgress RequirementStatus = "progress"
 const RS_InReview RequirementStatus = "review"
 const RS_Done RequirementStatus = "done"
 
+var ALL_RS = [...]RequirementStatus{RS_Draft, RS_New, RS_InProgress, RS_InReview, RS_Done}
+
 type Version struct {
 	Base
-	ProjectId string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Status    RequirementStatus
+	ProjectId   string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Description string
+	Status      RequirementStatus
 }
 
 type Story struct {
 	Base
-	VersionId string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Status    RequirementStatus
+	VersionId   string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Description string
+	Status      RequirementStatus
 }
 
 type SpecItemType string
@@ -74,7 +94,8 @@ const SIT_ComplianceRefernce SpecItemType = "compliance"
 
 type SpecItem struct {
 	Base
-	StoryId string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Type    SpecItemType
-	Status  RequirementStatus
+	StoryId     string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Description string
+	Type        SpecItemType
+	Status      RequirementStatus
 }
