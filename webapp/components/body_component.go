@@ -23,9 +23,9 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	currentProjectId := r.URL.Query().Get("currentProject")
 
 	if currentProjectId == "" {
-		cookie, err := r.Cookie("project")
+		projectCookie, err := r.Cookie("project")
 		if err == nil {
-			currentProjectId = cookie.Value
+			currentProjectId = projectCookie.Value
 		}
 	}
 
@@ -35,15 +35,23 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			slog.Error("Failed to load current project", "id", currentProjectId)
 		} else {
 			currentProject = cp
-			cookie := http.Cookie{
+			projectCookie := http.Cookie{
 				Name:     "project",
 				Value:    currentProjectId,
 				SameSite: http.SameSiteLaxMode,
 			}
 
-			http.SetCookie(w, &cookie)
+			http.SetCookie(w, &projectCookie)
 		}
 	}
+	var currentView string
+	viewCookie, err := r.Cookie("view")
+	if err == nil {
+		currentView = viewCookie.Value
+	} else {
+		currentView = "specs"
+	}
+
 	// First let's get last projects
 	filter := dt.QuerySettings{
 		Limit:       5,
@@ -58,5 +66,5 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot load last projects")
 	}
 
-	bodyComponent(currentProject, lastProjects).Render(r.Context(), w)
+	bodyComponent(currentProject, lastProjects, currentView).Render(r.Context(), w)
 }

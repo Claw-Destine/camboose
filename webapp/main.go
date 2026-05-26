@@ -11,7 +11,6 @@ import (
 	dt "claw-destine.com/camboose/core/datatypes"
 	cmp "claw-destine.com/camboose/webapp/components"
 	md "claw-destine.com/camboose/webapp/middleware"
-	"github.com/a-h/templ"
 	env "github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
@@ -44,13 +43,14 @@ func main() {
 
 	projectsHandler := cmp.NewProjectsHandler(&projectsCtl, &recipiesCtl)
 	specsHandler := cmp.NewSpecsHandler(&projectsCtl, &specsCtl)
+	tasksHandler := cmp.NewTasksHandler()
 
 	// Set up routes and inject controlers
 	mux.Handle("/components/body", cmp.NewBodyHandler(&projectsCtl))
 	mux.Handle("/components/specs", specsHandler)
 	mux.Handle("/components/version/", specsHandler)
 	mux.Handle("/components/versions", specsHandler)
-	mux.Handle("/components/tasks", templ.Handler(cmp.Tasks()))
+	mux.Handle("/components/tasks", tasksHandler)
 	mux.Handle("/components/projects", projectsHandler)
 	mux.Handle("/components/project/", projectsHandler)
 	mux.Handle("/components/recipies", cmp.NewRecipuesHandler(&recipiesCtl))

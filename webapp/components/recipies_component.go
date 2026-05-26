@@ -16,7 +16,7 @@ type RecipiesCompHandler struct {
 }
 
 func (ph RecipiesCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	setViewCookie(vRecipies, w)
 	recipies, err := ph.recipeManager.ListRecipes()
 	if err != nil {
 		slog.Error("Failed to load recipies", "reason", err)

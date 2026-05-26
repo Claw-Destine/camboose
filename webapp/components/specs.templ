@@ -11,7 +11,7 @@ if currentProject == nil {
 } else {
 
 <div class="box">
-    <form hx-post={ appendQueryParams("/components/version", paramCurrentProjec, currentProject.Id )}
+    <form hx-post={ appendQueryParams("/components/version", qkCurrProj, currentProject.Id )}
         hx-target="#versionlist-container">
         <div class="container is-fluid">
             <b>Create a new version / epic:</b>

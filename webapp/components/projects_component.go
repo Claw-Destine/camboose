@@ -108,6 +108,7 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 		pid = urlPart[len(urlPart)-1]
 
 	case allProjectsView:
+		setViewCookie(vProjects, w)
 		pid = r.URL.Query().Get("currentProject")
 	}
 

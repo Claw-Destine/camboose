@@ -41,6 +41,7 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/components/specs") {
 		switch r.Method {
 		case "GET":
+			setViewCookie(vSpecs, w)
 			sh.displaySpecsPage(p, si, w, r)
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
@@ -55,12 +56,11 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
 		}
-
 	} else if strings.HasPrefix(r.URL.Path, "/components/version") {
 		switch r.Method {
 		case "POST":
 			sh.createVersion(*p, r)
-			http.Redirect(w, r, appendQueryParams("/components/versions", paramCurrentProjec, pid), http.StatusSeeOther)
+			http.Redirect(w, r, appendQueryParams("/components/versions", qkCurrProj, pid), http.StatusSeeOther)
 		case http.MethodDelete:
 			sh.deleteVersion(r)
 			// Return empty string for swap

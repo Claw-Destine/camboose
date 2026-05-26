@@ -1,8 +1,12 @@
 package components
 
-import "log/slog"
+import (
+	"log/slog"
+	"net/http"
+)
 
-const paramCurrentProjec = "currentProject"
+// qk - query param keys keys
+const qkCurrProj = "currentProject"
 
 func appendQueryParams(basePath string, params ...string) string {
 	if len(params)%2 != 0 {
@@ -20,4 +24,22 @@ func appendQueryParams(basePath string, params ...string) string {
 		i = i + 2
 	}
 	return ret
+}
+
+// views
+type CambView string
+
+const vSpecs = "specs"
+const vTasks = "tasks"
+const vProjects = "projects"
+const vRecipies = "recipies"
+
+func setViewCookie(view CambView, w http.ResponseWriter) {
+	viewCookie := http.Cookie{
+		Name:     "view",
+		Value:    string(view),
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(w, &viewCookie)
 }

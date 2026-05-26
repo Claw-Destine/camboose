@@ -42,9 +42,9 @@ func specsComponent(currentProject *dt.Project, si []dt.Version) templ.Component
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(appendQueryParams("/components/version", paramCurrentProjec, currentProject.Id))
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(appendQueryParams("/components/version", qkCurrProj, currentProject.Id))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/specs.templ`, Line: 14, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `webapp/components/specs.templ`, Line: 14, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

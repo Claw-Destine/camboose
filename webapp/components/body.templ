@@ -4,7 +4,15 @@ import "fmt"
 
 import dt "claw-destine.com/camboose/core/datatypes"
 
-templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
+func activeClass(view string, currView string) string {
+if view == currView {
+return "is-active"
+} else {
+return ""
+}
+}
+
+templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project, viewUrl string) {
 <div class="columns" id="main-body">
     <aside class="menu column is-narrow">
         <figure class="image is-128x128">
@@ -26,7 +34,7 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
             <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
                     for _, p := range lastProjects {
-                    <a class="dropdown-item" hx-get={fmt.Sprintf("/components/body?currentProject=%s" , p.Id)}
+                    <a class="dropdown-item" hx-get={ appendQueryParams("/components/body", qkCurrProj , p.Id)}
                         hx-swap="outerHTML" hx-target="#main-body"> { p.Name } </a>
                     }
                 </div>
@@ -40,17 +48,17 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
         }}
         <ul class="menu-list" id="menu-list">
             <p class="menu-label">Plan</p>
-            <li><a class="is-active" onclick="setActiveMenu(this)" hx-trigger="click"
+            <li><a class={activeClass("specs", viewUrl)} onclick="setActiveMenu(this)" hx-trigger="click"
                     hx-get={fmt.Sprintf("/components/specs%s", postfix)} hx-target="#main-container">Specs</a></li>
             <p class="menu-label">Deliver</p>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/tasks%s", postfix)}
-                    hx-target="#main-container">Tasks</a></li>
+            <li><a class={activeClass("tasks", viewUrl)} onclick="setActiveMenu(this)" hx-trigger="click"
+                    hx-get={fmt.Sprintf("/components/tasks%s", postfix)} hx-target="#main-container">Tasks</a></li>
             <p class="menu-label">Manage</p>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/projects%s",
-                    postfix)} hx-target="#main-container">Projects</a>
+            <li><a class={activeClass("projects", viewUrl)} onclick="setActiveMenu(this)" hx-trigger="click"
+                    hx-get={fmt.Sprintf("/components/projects%s", postfix)} hx-target="#main-container">Projects</a>
             </li>
-            <li><a onclick="setActiveMenu(this)" hx-trigger="click" hx-get={fmt.Sprintf("/components/recipies%s",
-                    postfix)} hx-target="#main-container">Recipies</a>
+            <li><a class={activeClass("recipies", viewUrl)} onclick="setActiveMenu(this)" hx-trigger="click"
+                    hx-get={fmt.Sprintf("/components/recipies%s", postfix)} hx-target="#main-container">Recipies</a>
             </li>
             // <p class="menu-label">Awaiting Tasks</p>
 
@@ -63,7 +71,7 @@ templ bodyComponent(currentProject *dt.Project, lastProjects []dt.Project) {
             // </nav>
 
     </aside>
-    <div id="main-container" class="column" hx-get={fmt.Sprintf("/components/specs%s", postfix)} hx-trigger="load">
+    <div id="main-container" class="column" hx-get={ "/components/" + viewUrl + postfix } hx-trigger="load">
     </div>
 </div>
 }
