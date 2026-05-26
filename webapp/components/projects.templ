@@ -11,10 +11,17 @@ if p != nil {
 	<h2 class="subtitle">Id: {p.Id}</h2>
 	<p>Created At: { p.CreatedAt.String() }</p>
 	<p>Last Update: { p.UpdatedAt.String() }</p>
-	<h2 class="subtitle">Versions:</h2>
-	for _, st := range dt.ALL_RS{
-	<p>{ st } : { p.VersionStatusCounts[st]}</p>
-	}
+	<h2 class="is-size-3">Versions:</h2>
+	<nav class="level">
+		for _, st := range dt.ALL_RS{
+		<div class="level-item has-text-centered">
+			<div>
+				<p class="heading">{st}</p>
+				<p class="title">{ p.VersionStatusCounts[st]}</p>
+			</div>
+		</div>
+		}
+	</nav>
 	<form hx-put={ projectLink(p.Id) } hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
 		<label class="label">Recipe</label>
 		<div class="select is-primary">
