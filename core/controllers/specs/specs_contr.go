@@ -73,9 +73,9 @@ func (pm *SpecsController) VersionStatistics(versions any) (map[string]map[dt.Re
 	var storyCounts []storyCountRow
 
 	if err := pm.Db.Model(&dt.Story{}).
-		Select("project_id, status, COUNT(*) as count").
-		Where("project_id IN ?", projectIDs).
-		Group("project_id, status").
+		Select("version_id, status, COUNT(*) as count").
+		Where("version_id IN ?", projectIDs).
+		Group("version_id, status").
 		Scan(&storyCounts).Error; err != nil {
 		return nil, err
 	}

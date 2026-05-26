@@ -44,6 +44,12 @@ templ versionItem(si dt.Version) {
                 <p><b>{ si.Name }</b></p>
             </div>
         </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Status</p>
+                <p><b>{ si.Status }</b></p>
+            </div>
+        </div>
         for _, st := range dt.ALL_RS{
         <div class="level-item has-text-centered">
             <div>

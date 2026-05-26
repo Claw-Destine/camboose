@@ -17,5 +17,5 @@ func ConnectToPostgres(pgconf dt.PostgresConfig) (*gorm.DB, error) {
 }
 
 func MigrateDatabase(db *gorm.DB) error {
-	return db.AutoMigrate(&dt.Project{}, &dt.Version{})
+	return db.AutoMigrate(&dt.Project{}, &dt.Version{}, &dt.Story{})
 }
