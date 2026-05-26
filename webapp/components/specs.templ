@@ -35,8 +35,24 @@ for _, s := range si {
 
 templ versionItem(si dt.Version) {
 <div id={ "ver_" + si.Id} class="box container is-fluid">
-    <b>{ si.Name }</b>
     <button class="delete is-pulled-right" hx-confirm="This will permanently delete the version. Are you sure?"
         hx-delete={"/components/version/" + si.Id } hx-swap="outerHTML" hx-target={ "#ver_" + si.Id}></button>
+    <nav class="level">
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Name</p>
+                <p><b>{ si.Name }</b></p>
+            </div>
+        </div>
+        for _, st := range dt.ALL_RS{
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">{st}</p>
+                <p><b>{ si.StoryStatusCounts[st]}</b></p>
+            </div>
+        </div>
+        }
+    </nav>
+
 </div>
 }

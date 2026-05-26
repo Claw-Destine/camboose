@@ -28,14 +28,21 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	pid := r.URL.Query().Get("currentProject")
 
-	if pid != "" {
+	if pid != "" && r.Method == http.MethodGet {
 		p, err = sh.projectsCtl.GetProjectById(r.Context(), pid)
 		if err != nil {
-			slog.Error("Failed to fetch project", "id", pid, "error", err)
+			slog.Error("Failed to fetch versions for project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		si, err = sh.specsCtl.ListVersions(p.Id)
+		statCounts, err := sh.specsCtl.VersionStatistics(si)
+		if err != nil {
+			slog.Error("Failed to fetch versions statistics for project", "id", pid, "error", err)
+		}
+		for idx, s := range si {
+			si[idx].StoryStatusCounts = statCounts[s.Id]
+		}
 	}
 
 	if strings.HasPrefix(r.URL.Path, "/components/specs") {

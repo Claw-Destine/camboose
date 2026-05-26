@@ -1,6 +1,8 @@
 package specs
 
 import (
+	"log/slog"
+
 	dt "claw-destine.com/camboose/core/datatypes"
 	"gorm.io/gorm"
 )
@@ -45,4 +47,45 @@ func (sc *SpecsController) UpdateVersion(si dt.Version) (*dt.Version, error) {
 
 func (sc *SpecsController) DeleteVersionById(id string) error {
 	return sc.Db.Delete(&dt.Version{}, "id = ?", id).Error
+}
+
+func (pm *SpecsController) VersionStatistics(versions any) (map[string]map[dt.RequirementStatus]int, error) {
+	var projectIDs []string
+	switch pp := versions.(type) {
+	case []string:
+		projectIDs = pp
+	case []dt.Version:
+		projectIDs = make([]string, len(pp))
+		for _, p := range pp {
+			projectIDs = append(projectIDs, p.Id)
+		}
+	default:
+		slog.Error("VersionStatistics method accepts only []string and []Project")
+		return nil, &dt.WrongTypeError{What: "VersionStatistics method accepts only []string and []Project"}
+	}
+
+	type storyCountRow struct {
+		ProjectId string
+		Status    dt.RequirementStatus
+		Count     int
+	}
+
+	var storyCounts []storyCountRow
+
+	if err := pm.Db.Model(&dt.Story{}).
+		Select("project_id, status, COUNT(*) as count").
+		Where("project_id IN ?", projectIDs).
+		Group("project_id, status").
+		Scan(&storyCounts).Error; err != nil {
+		return nil, err
+	}
+
+	countsByVersion := make(map[string]map[dt.RequirementStatus]int, len(projectIDs))
+	for _, row := range storyCounts {
+		if _, ok := countsByVersion[row.ProjectId]; !ok {
+			countsByVersion[row.ProjectId] = make(map[dt.RequirementStatus]int)
+		}
+		countsByVersion[row.ProjectId][row.Status] = row.Count
+	}
+	return countsByVersion, nil
 }

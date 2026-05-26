@@ -73,9 +73,10 @@ var ALL_RS = [...]RequirementStatus{RS_Draft, RS_New, RS_InProgress, RS_InReview
 
 type Version struct {
 	Base
-	ProjectId   string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Description string
-	Status      RequirementStatus
+	ProjectId         string `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Description       string
+	Status            RequirementStatus
+	StoryStatusCounts map[RequirementStatus]int `gorm:"-"`
 }
 
 type Story struct {
