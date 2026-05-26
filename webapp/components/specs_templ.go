@@ -197,7 +197,7 @@ func versionItem(si dt.Version) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</b></p></div></div><div class=\"level-item has-text-centered\"><div><button class=\"button\" onclick=\"event.stopPropagation()\">Edit</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</b></p></div></div><div class=\"level-item has-text-centered\"><div><button class=\"button\" onclick=\"showElement('editversion');event.stopPropagation()\">Edit</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -58,7 +58,7 @@ templ versionItem(si dt.Version) {
         </div>
         <div class="level-item has-text-centered">
             <div>
-                <button class="button" onclick="event.stopPropagation()">Edit</button>
+                <button class="button" onclick="showElement('editversion');event.stopPropagation()">Edit</button>
             </div>
         </div>
         for _, st := range dt.ALL_RS{

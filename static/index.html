@@ -21,7 +21,7 @@
         <div class="modal-background" onclick="hideElement('newproject')"></div>
         <div class=" modal-content">
             <div class="box">
-                <h3>Create new project</h3>
+                <h3 class="is-size-4">Create new project</h3>
                 <!-- <form action="/components/project" method="post"> -->
                 <form hx-post="/components/project" hx-swap="outerHTML" hx-target="#main-body"
                     hx-on::before-request="hideElement('newproject')">
@@ -39,6 +39,15 @@
         <button class="modal-close is-large" aria-label="close" onclick="hideElement('newproject')"></button>
     </div>
     <div class="columns" id="main-body" hx-get="/components/body" hx-trigger="load" hx-swap="outerHTML">
+    </div>
+    <div id="editversion" class="modal">
+        <div class="modal-background" onclick="hideElement('editversion')"></div>
+        <div class=" modal-content">
+            <div class="box">
+                <h3 class="is-size-4">Edit version</h3>
+            </div>
+            <button class="modal-close is-large" aria-label="close" onclick="hideElement('editversion')"></button>
+        </div>
     </div>
 </body>
 
