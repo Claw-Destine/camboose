@@ -1,7 +1,7 @@
 package components
 
 import (
-	"log/slog"
+	"io"
 	"net/http"
 
 	"claw-destine.com/camboose/core/controllers/projects"
@@ -17,12 +17,13 @@ type RecipiesCompHandler struct {
 
 func (ph RecipiesCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	setViewCookie(vRecipies, w)
-	recipies, err := ph.recipeManager.ListRecipes()
-	if err != nil {
-		slog.Error("Failed to load recipies", "reason", err)
-	}
-	err = recipiesComponent(recipies).Render(r.Context(), w)
-	if err != nil {
-		slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
-	}
+	io.WriteString(w, "")
+	// recipies, err := ph.recipeManager.ListRecipes()
+	// if err != nil {
+	// 	slog.Error("Failed to load recipies", "reason", err)
+	// }
+	// err = recipiesComponent(recipies).Render(r.Context(), w)
+	// if err != nil {
+	// 	slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
+	// }
 }

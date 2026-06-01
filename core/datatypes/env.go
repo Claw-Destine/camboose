@@ -9,6 +9,7 @@ type PostgresConfig struct {
 }
 
 type Config struct {
-	PgConf     PostgresConfig
-	RecipePath string `env:"RECIPIES_PATH" envDefault:"recipies"`
+	PgConf        PostgresConfig
+	RecipePath    string `env:"RECIPIES_PATH" envDefault:"recipies"`
+	StaticHtmlDir string `env:"STATIC_DIR"`
 }

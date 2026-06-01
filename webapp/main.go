@@ -28,7 +28,7 @@ func main() {
 
 	// Init server and static dir
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir("./static")))
+	mux.Handle("/", http.FileServer(http.Dir(cfg.StaticHtmlDir)))
 
 	// Create controllers
 	db, err := postgres.ConnectToPostgres(cfg.PgConf)
