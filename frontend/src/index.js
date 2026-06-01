@@ -1,4 +1,5 @@
 import "bulma/css/bulma.min.css";
-import { CambBody } from './cambBodyElement.js'
+import { registerCambBody } from "./cambBodyElement.js";
 
-customElements.define("camb-body", CambBody)
+
+registerCambBody()

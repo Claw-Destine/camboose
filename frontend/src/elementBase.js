@@ -1,25 +1,24 @@
 import htmx from 'htmx.org';
 
-function cloneTemplateContent(templateSource) {
-    const template = document.createElement('template');
-    template.innerHTML = templateSource.trim();
-    return template.content.cloneNode(true);
-}
-
 // Base for elements with not shadow root
 export class TemplElement extends HTMLElement {
-    constructor(templateSource) {
+    constructor(tplId) {
         super();
-        this.appendChild(cloneTemplateContent(templateSource));
+        let template = document.getElementById(tplId);
+        let templateContent = template.content;
+        this.appendChild(document.importNode(templateContent, true));
     }
 }
 
 // Base for elements with shadow root
 export class ShadowTemplElement extends HTMLElement {
-    constructor(templateSource, useGlobalStyles = false) {
+    constructor(tplId, useGlobalStyles = false) {
         super();
+        let template = document.getElementById(tplId);
+        let templateContent = template.content;
         const shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.appendChild(cloneTemplateContent(templateSource));
+        shadowRoot.appendChild(document.importNode(templateContent, true));
+
         if (useGlobalStyles) {
             const globalStyles = document.querySelectorAll('style'); // or any identifier
             globalStyles.forEach(style => {
@@ -33,5 +32,20 @@ export class ShadowTemplElement extends HTMLElement {
         if (htmx && typeof htmx.process === 'function') {
             htmx.process(this.shadowRoot);
         }
+    }
+}
+
+export function registerElementWithTemplate(elemId, elemCls, templateSource) {
+    let template = document.getElementById(elemId);
+    if (!(template instanceof HTMLTemplateElement)) {
+        template = document.createElement('template');
+        template.id = elemId;
+        document.body.appendChild(template);
+    }
+
+    template.innerHTML = templateSource.trim();
+
+    if (!customElements.get(elemId)) {
+        customElements.define(elemId, elemCls);
     }
 }

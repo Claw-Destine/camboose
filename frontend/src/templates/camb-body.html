@@ -1,57 +1,44 @@
 <div class="columns" id="main-body">
     <aside class="menu column is-narrow">
         <figure class="image is-128x128">
-            <img src="<%=require('./src/assets/camboose_logo.png')%>" alt="logo" />
+            <img src="../assets/camboose_logo.png" alt="logo" />
         </figure>
         <h1 class="title">camboose</h1>
         <p class="menu-label">Current Project</p>
         <div id="quick-project-select" class="dropdown">
             <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu"
-                    onclick="toggleClass('quick-project-select')">
-                    if currentProject != nil {
-                    <span>{currentProject.Name}</span>
-                    } else {
-                    <span>Select Project</span>
-                    }
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                    Select project
                 </button>
             </div>
             <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                <div class="dropdown-content" slot="project-dropdown">
+                <div class="dropdown-content">
+                    <slot name="project-dropdown">Create new project</slot>
                 </div>
             </div>
         </div>
-        {{
-        postfix := ""
-        if (currentProject != nil) {
-        postfix="?currentProject=" + currentProject.Id
-        }
-        }}
+
         <ul class="menu-list" id="menu-list">
             <p class="menu-label">Plan</p>
-            <li><a class={activeClass("specs", viewUrl)} hx-trigger="click" hx-get={fmt.Sprintf("/components/specs%s",
-                    postfix)} hx-target="#main-container">Specs</a></li>
+            <li><a hx-trigger="click" hx-target="#main-container">Specs</a></li>
             <p class="menu-label">Deliver</p>
-            <li><a class={activeClass("tasks", viewUrl)} hx-trigger="click" hx-get={fmt.Sprintf("/components/tasks%s",
-                    postfix)} hx-target="#main-container">Tasks</a></li>
+            <li><a hx-trigger="click" hx-target="#main-container">Tasks</a></li>
             <p class="menu-label">Manage</p>
-            <li><a class={activeClass("projects", viewUrl)} hx-trigger="click"
-                    hx-get={fmt.Sprintf("/components/projects%s", postfix)} hx-target="#main-container">Projects</a>
+            <li><a hx-trigger="click" hx-target="#main-container">Projects</a>
             </li>
-            <li><a class={activeClass("recipies", viewUrl)} hx-trigger="click"
-                    hx-get={fmt.Sprintf("/components/recipies%s", postfix)} hx-target="#main-container">Recipies</a>
+            <li><a hx-trigger="click" hx-target="#main-container">Recipies</a>
             </li>
-            // <p class="menu-label">Awaiting Tasks</p>
+            <!-- // <p class="menu-label">Awaiting Tasks</p> -->
 
         </ul>
-        // <nav class="panel is-info">
+        <!-- // <nav class="panel is-info">
             // <p class="panel-tabs">
                 // <a class="is-active">Current project</a>
                 // <a>All</a>
                 // </p>
-            // </nav>
+            // </nav> -->
 
     </aside>
-    <div id="main-container" class="column" hx-get={ "/components/" + viewUrl + postfix } hx-trigger="load">
+    <div id="main-container" class="column">
     </div>
 </div>
