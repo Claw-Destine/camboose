@@ -27,8 +27,8 @@ func NewBodyHandler(pm *pm.ProjectControler) BodyCompHandler {
 	// `
 
 	tpl := `<camb-body {{if .Project}}project-id="{{.Project.Id}}"{{end}} view="{{.View}}">
-<a slot="project-dropdown" class="dropdown-item" hx-get="/components/body?currentProject=hi"
-	hx-swap="outerHTML" hx-target="#main-body"> hello
+<a slot="project-dropdown" class="dropdown-item" 
+	hx-target="#main-container"> {{.Project.Name}}
 </a></camb-body>`
 	t, err := template.New("main-body").Parse(tpl)
 	if err != nil {

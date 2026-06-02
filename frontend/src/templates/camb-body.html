@@ -6,14 +6,14 @@
         <h1 class="title">camboose</h1>
         <p class="menu-label">Current Project</p>
         <div id="quick-project-select" class="dropdown">
-            <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+            <div id="quick-project-button" class="dropdown-trigger">
+                <button id="quick-project-caption" class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                     Select project
                 </button>
             </div>
-            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-menu" id="quick-project-menu" role="menu">
                 <div class="dropdown-content">
-                    <slot name="project-dropdown">Create new project</slot>
+                    <slot id="quick-project-slot" name="project-dropdown">Create new project</slot>
                 </div>
             </div>
         </div>
