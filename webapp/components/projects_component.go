@@ -25,7 +25,7 @@ const (
 
 func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	setViewCookie(vProjects, w)
-	io.WriteString(w, "")
+	io.WriteString(w, "projects")
 	// Order matters
 	// if strings.HasPrefix(r.URL.Path, "/components/projects") {
 	// 	ph.displayProjectView(allProjectsView, w, r)

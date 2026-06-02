@@ -13,14 +13,24 @@ export class CambBody extends ShadowTemplElement {
             console.error("project-id not set for camb-body")
         }
 
-        const menuItems = this.querySelectorAll('#menu-list a');
-        menuItems.forEach(item => item.addEventListener('click', event => this.setActiveMenu(event)));
+        this.setupMenu()
     }
 
-    setActiveMenu(clickedElement) {
-        const menuItems = this.querySelectorAll('#menu-list a');
-        menuItems.forEach(item => item.classList.remove('is-active'));
-        clickedElement.classList.add('is-active');
+    setupMenu() {
+        const menuItems = this.shadowRoot.querySelectorAll('#menu-list a');
+
+        function setActiveMenu(clickedElement) {
+            menuItems.forEach(item => item.classList.remove('is-active'));
+            clickedElement.classList.add('is-active');
+        }
+
+        function setupMenuItem(item) {
+            item.addEventListener('click', event => setActiveMenu(event.target))
+            const path = "/components/" + item.id.split("-")[0]
+            item.setAttribute("hx-get", path)
+        }
+
+        menuItems.forEach(item => setupMenuItem(item));
     }
 }
 

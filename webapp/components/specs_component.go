@@ -19,7 +19,7 @@ type SpecsCompHandler struct {
 
 func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	setViewCookie(vRecipies, w)
-	io.WriteString(w, "")
+	io.WriteString(w, "specs")
 }
 
 // 	var p *dt.Project
