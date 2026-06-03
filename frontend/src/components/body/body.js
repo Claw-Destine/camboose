@@ -1,8 +1,8 @@
 import htmx from 'htmx.org';
-import { ShadowTemplElement } from './elementBase.js';
-import bodyTemplate from './templates/camb-body.html'
-import { registerElementWithTemplate } from "./elementBase.js";
-import { toggleClass } from './utils.js';
+import { ShadowTemplElement } from '../../elementBase.js';
+import bodyTemplate from './camb-body.html'
+import { registerElementWithTemplate } from "../../elementBase.js";
+import { toggleClass } from '../../utils.js';
 
 export class CambBody extends ShadowTemplElement {
     static observedAttributes = ["project-id", "view"];

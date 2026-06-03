@@ -2,8 +2,7 @@ import htmx from 'htmx.org';
 
 // Base for elements with not shadow root
 export class TemplElement extends HTMLElement {
-    constructor(tplId) {
-        super();
+    constructor(root, tplId) {
         let template = document.getElementById(tplId);
         let templateContent = template.content;
         this.appendChild(document.importNode(templateContent, true));
@@ -49,3 +48,5 @@ export function registerElementWithTemplate(elemId, elemCls, templateSource) {
         customElements.define(elemId, elemCls);
     }
 }
+
+export function registerModal(elemId, templateSourece) { }

@@ -18,18 +18,18 @@ type bodyData struct {
 
 func NewBodyHandler(pm *pm.ProjectControler) BodyCompHandler {
 	bh := BodyCompHandler{projectManager: pm}
-	// 	tpl := `<camb-body {{if .Project}}project-id="{{.Project.Id}}"{{end}} view="{{.View}}">
-	// {{range .Projects}}<a slot="project-dropdown" class="dropdown-item"
-	// 	hx-get="/components/body?currentProject={{.Id}}"
-	// 	hx-swap="outerHTML" hx-target="#main-body"> {{.Name}}
-	// </a>
-	// {{end}}</camb-body>
-	// `
-
 	tpl := `<camb-body {{if .Project}}project-id="{{.Project.Id}}"{{end}} view="{{.View}}">
-<a slot="project-dropdown" class="dropdown-item" 
-	hx-target="#main-container"> {{.Project.Name}}
-</a></camb-body>`
+	{{ range .Projects}}<a slot="project-dropdown" class="dropdown-item"
+		hx-get="/components/body?currentProject={{.Id}}"
+		hx-swap="outerHTML" hx-target="#main-body"> {{.Name}}
+	</a>
+	{{end}}</camb-body>
+	`
+
+	// 	tpl := `<camb-body {{if .Project}}project-id="{{.Project.Id}}"{{end}} view="{{.View}}">
+	// <a slot="project-dropdown" class="dropdown-item"
+	// 	hx-target="#main-container"> {{.Project.Name}}
+	// </a></camb-body>`
 	t, err := template.New("main-body").Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
