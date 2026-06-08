@@ -1,13 +1,13 @@
-function setActiveMenu(clickedElement) {
+function setActiveMenu(clickedElement: Element) {
     const menuItems = document.querySelectorAll('#menu-list a');
     menuItems.forEach(item => item.classList.remove('is-active'));
     clickedElement.classList.add('is-active');
 }
-function showElement(elementId) {
+function showElement(elementId: string) {
     const element = document.querySelectorAll("#" + elementId);
     element.forEach(item => item.classList.add('is-active'));
 }
-function hideElement(elementId) {
+function hideElement(elementId: string) {
     const element = document.querySelectorAll("#" + elementId);
     element.forEach(item => item.classList.remove('is-active'));
 }
@@ -19,12 +19,12 @@ function hideElement(elementId) {
 //     const notElem = document.querySelectorAll("#notification-bar");
 //     notElem.forEach(item => item.classList.remove('is-hidden'));
 // })
-function hideNotification(elementId) {
+function hideNotification(elementId: string) {
     const element = document.querySelectorAll("#" + elementId);
     element.forEach(item => item.classList.add('is-hidden'));
 }
-export function toggleClass(root, elementId, cls = "is-active") {
-    function toggleItem(item) {
+export function toggleClass(root: ParentNode, elementId: string, cls = "is-active") {
+    function toggleItem(item: Element) {
         if (item.classList.contains(cls)) {
             item.classList.remove(cls);
         } else {

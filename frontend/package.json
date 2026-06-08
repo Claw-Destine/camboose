@@ -8,16 +8,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode=production --config-node-env=production",
     "build:dev": "webpack --mode=development",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^24.6.0",
     "css-loader": "^7.1.4",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.7",
     "mini-css-extract-plugin": "^2.10.2",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
     "style-loader": "^4.0.0",
     "webpack": "^5.107.2",
     "webpack-cli": "^7.0.3"

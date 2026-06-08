@@ -12,9 +12,12 @@ const stylesHandler = isProduction ? MiniCssExtractPlugin.loader : "style-loader
 
 /** @type {import("webpack").Configuration} */
 const config = {
-    entry: "./src/index.js",
+    entry: "./src/index.ts",
     output: {
         path: path.resolve(__dirname, "dist"),
+    },
+    resolve: {
+        extensions: [".ts", ".js"],
     },
     plugins: [
         new HtmlWebpackPlugin({
@@ -26,6 +29,11 @@ const config = {
     ],
     module: {
         rules: [
+            {
+                test: /\.tsx?$/,
+                use: "ts-loader",
+                exclude: /node_modules/
+            },
             {
                 test: /\.css$/i,
                 use: [stylesHandler, "css-loader"],
@@ -41,7 +49,12 @@ const config = {
 
             {
                 test: /\.html$/i,
-                use: ["html-loader"],
+                use: [{
+                    loader: "html-loader",
+                    options: {
+                        minimize: false,
+                    },
+                }],
             },
 
             // Add your rules for custom modules here

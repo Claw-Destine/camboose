@@ -14,11 +14,12 @@
         </div>
         }
     </nav>
-    <form hx-put={ projectLink(p.Id) } hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
+    <form hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
         <label class="label">Recipe</label>
         <div class="select is-primary">
             <select name="recipe">
-                if p.Recipe == "" {
+                <slot name="recipies"></slot>
+                <!-- if p.Recipe == "" {
                 <option selected></option>
                 }
                 for _, r := range recipies {
@@ -27,7 +28,7 @@
                 } else {
                 <option>{ r.Id } </option>
                 }
-                }
+                } -->
             </select>
         </div>
         <div class="field is-grouped"><input type="submit" class="button is-link" value="Update"></div>
