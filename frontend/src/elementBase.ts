@@ -27,6 +27,8 @@ export class ShadowTemplElement extends HTMLElement {
         const shadowRoot = this.attachShadow({ mode: "open" });
         shadowRoot.appendChild(document.importNode(templateContent, true));
 
+        this.setupSlotLinks()
+
         if (useGlobalStyles) {
             const globalStyles = document.querySelectorAll('style'); // or any identifier
             globalStyles.forEach(style => {
@@ -40,6 +42,37 @@ export class ShadowTemplElement extends HTMLElement {
         if (htmx && typeof htmx.process === 'function') {
             htmx.process(this.shadowRoot);
         }
+    }
+
+    setupSlotLinks() {
+        const slots = this.shadowRoot?.querySelectorAll<HTMLSlotElement>('slot');
+        if (slots.length == 0) {
+            return;
+        }
+        const slot = slots[0]
+        slot.addEventListener('click', event => {
+            const path = event.composedPath();
+            const link = path.find(node => node instanceof HTMLAnchorElement);
+            if (!(link instanceof HTMLAnchorElement)) {
+                return;
+            }
+
+            const url = link.getAttribute('data-href-url') || link.getAttribute('href');
+            if (!url || url === '#') {
+                return;
+            }
+
+            const targetId = link.getAttribute('data-href-target')
+
+            const target = this.shadowRoot?.querySelector<HTMLElement>(targetId);
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            htmx.ajax('GET', url, target);
+        });
     }
 }
 

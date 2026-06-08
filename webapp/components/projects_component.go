@@ -15,7 +15,8 @@ func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) Projec
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
 	tpl := `<camb-projects>
-{{range .Projects}}<a slot="projects-list" class="panel-block" href="#" data-project-url="/components/project/{{ .Id }}">{{.Name}}</a>
+{{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
+data-href-url="/components/project/{{ .Id }}" data-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
 	t, err := template.New("projects").Parse(tpl)
 	if err != nil {
