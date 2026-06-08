@@ -14,7 +14,7 @@ export class CambBody extends ShadowTemplElement {
         const view = this.getAttribute("view");
 
         this.setupMenu(pid, view);
-        this.setupQuickProjectMenu(pid, view);
+        this.setupQuickProjectMenu();
     }
 
     setupMenu(currentPid: string | null, currentView: string | null) {
@@ -50,7 +50,7 @@ export class CambBody extends ShadowTemplElement {
         menuItems.forEach(item => setupMenuItem(item));
     }
 
-    setupQuickProjectMenu(pid: string | null, currentView: string | null) {
+    setupQuickProjectMenu() {
         const button = this.shadowRoot?.querySelector<HTMLElement>('#quick-project-button');
         if (!button || !this.shadowRoot) {
             return;
@@ -62,31 +62,20 @@ export class CambBody extends ShadowTemplElement {
             return;
         }
 
-        // function setupProjectLink(item: Node, root: ShadowRoot) {
-        //     item.addEventListener('click', _ => toggleClass(root, "quick-project-select"));
-        //     let path = "/components/body";
-        //     let sep = "?"
-        //     if (pid) {
-        //         path = path + sep + "currentProject=" + pid;
-        //         sep = "&"
-        //     }
-        //     if (currentView) {
-        //         path = path + sep + "currentView=" + currentView
-        //     }
-        //     if (item instanceof HTMLElement) {
-        //         item.setAttribute("hx-get", path);
-        //     }
-        //     caption.textContent = item.textContent;
-        // }
+        function setCaption(item: Node, root: ShadowRoot) {
+            if (item instanceof Element && item.classList.contains("is-active")) {
+                caption.textContent = item.textContent;
+            }
 
-        // let menu = this.shadowRoot.querySelectorAll('#quick-project-menu')[0];
+        }
+
         const slot = this.shadowRoot.querySelector<HTMLSlotElement>('#quick-project-slot');
         if (!slot) {
             return;
         }
 
         const projectLinks = slot.assignedNodes();
-        // projectLinks.forEach(item => setupProjectLink(item, this.shadowRoot));
+        projectLinks.forEach(item => setCaption(item, this.shadowRoot));
     }
 
     attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
