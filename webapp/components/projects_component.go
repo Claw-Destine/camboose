@@ -15,22 +15,30 @@ func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) Projec
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
 	tpl := `<camb-projects>
-{{range .Projects}}<a slot="projects-list" class="panel-block" hx-get={{ .Id }} 
-hx-target="#project-details">{{.Name}}</a>
+{{range .Projects}}<a slot="projects-list" class="panel-block" href="#" data-project-url="/components/project/{{ .Id }}">{{.Name}}</a>
 {{end}}</camb-projects>`
 	t, err := template.New("projects").Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
 		log.Panic("exiting")
 	}
-	bh.templ = t
+	bh.projectsTpl = t
+
+	tpl = `<p>{{ .Id }}</p>`
+	t, err = template.New("project").Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	bh.projectTpl = t
 	return bh
 }
 
 type ProjectsCompHandler struct {
 	projectManager *pm.ProjectControler
 	recipeManager  *pm.RecipeController
-	templ          *template.Template
+	projectsTpl    *template.Template
+	projectTpl     *template.Template
 }
 
 type projectView int
@@ -49,10 +57,10 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	// Order matters
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
-		// } else if strings.HasPrefix(r.URL.Path, "/components/project/") {
+	} else if strings.HasPrefix(r.URL.Path, "/components/project/") {
 		// 	switch r.Method {
 		// 	case "GET":
-		// 		ph.displayProjectView(singleProjectView, w, r)
+		ph.displayProjectView(singleProjectView, w, r)
 		// 	case "POST":
 		// 		ph.createProject(w, r)
 		// 	case "PUT":
@@ -65,9 +73,9 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		// 		slog.Error("Unknown method", "method", r.Method)
 		// 		http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
 		// 	}
-		// } else {
-		// 	slog.Error("Wrong path", "path", r.URL.Path)
-		// 	http.Error(w, "Wrong url", http.StatusBadRequest)
+	} else {
+		slog.Error("Wrong path", "path", r.URL.Path)
+		http.Error(w, "Wrong url", http.StatusBadRequest)
 	}
 }
 
@@ -110,41 +118,36 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 // }
 
 func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
-	projects, err := ph.projectManager.ListProjects(nil)
-	if err != nil {
-		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+
+	var pid string
+	var p *dt.Project
+	var err error
+
+	switch view {
+	case singleProjectView:
+		urlPart := strings.Split(r.URL.Path, "/")
+		pid = urlPart[len(urlPart)-1]
+
+	case allProjectsView:
+		setViewCookie(vProjects, w)
+		pid = r.URL.Query().Get("currentProject")
 	}
 
-	// var pid string
-	// var p *dt.Project
-
-	// switch view {
-	// case singleProjectView:
-	// 	urlPart := strings.Split(r.URL.Path, "/")
-	// 	pid = urlPart[len(urlPart)-1]
-
-	// case allProjectsView:
-	// 	setViewCookie(vProjects, w)
-	// 	pid = r.URL.Query().Get("currentProject")
-	// }
-
-	// if pid != "" {
-	// 	p, err = ph.projectManager.GetProjectById(r.Context(), pid)
-	// 	if err != nil {
-	// 		slog.Error("Failed to fetch project", "id", pid, "error", err)
-	// 		http.Error(w, err.Error(), http.StatusBadRequest)
-	// 		return
-	// 	}
-	// 	stats, err := ph.projectManager.ProjectStatistics([]string{pid})
-	// 	if err != nil {
-	// 		if err != nil {
-	// 			slog.Error("Failed to stats for project", "id", pid, "error", err)
-	// 		}
-	// 	}
-	// 	p.VersionStatusCounts = stats[pid]
-	// }
+	if pid != "" {
+		p, err = ph.projectManager.GetProjectById(r.Context(), pid)
+		if err != nil {
+			slog.Error("Failed to fetch project", "id", pid, "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		stats, err := ph.projectManager.ProjectStatistics([]string{pid})
+		if err != nil {
+			if err != nil {
+				slog.Error("Failed to stats for project", "id", pid, "error", err)
+			}
+		}
+		p.VersionStatusCounts = stats[pid]
+	}
 
 	// recipies, err := ph.recipeManager.ListRecipes()
 	// if err != nil {
@@ -154,14 +157,24 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 	// }
 
 	switch view {
-	// case singleProjectView:
-	// 	err = projectComponent(p, recipies).Render(r.Context(), w)
+	case singleProjectView:
+
+		if err := ph.projectTpl.Execute(w, p); err != nil {
+			slog.Error("Cannot render body component", "err", err)
+			http.Error(w, "failed to render body", http.StatusInternalServerError)
+		}
 	case allProjectsView:
+		projects, err := ph.projectManager.ListProjects(nil)
+		if err != nil {
+			slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		data := projectsData{
 			Projects: projects,
 		}
 
-		if err := ph.templ.Execute(w, data); err != nil {
+		if err := ph.projectsTpl.Execute(w, data); err != nil {
 			slog.Error("Cannot render body component", "err", err)
 			http.Error(w, "failed to render body", http.StatusInternalServerError)
 		}
