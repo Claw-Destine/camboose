@@ -26,7 +26,11 @@ shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-det
 	bh.projectsTpl = t
 
 	tpl = `<camb-project data-pid={{.Id}} data-name={{.Name}} data-created={{.CreatedAt}} 
-	data-updated={{.UpdatedAt}}></camb-project>`
+data-updated={{.UpdatedAt}}>{{range $key,$val := .VersionStatusCounts}}
+<div slot="version-stats" class="level-item has-text-centered">
+<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p>
+</div></div>{{end}}
+</camb-project>`
 	t, err = template.New("project").Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
@@ -148,7 +152,11 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 				slog.Error("Failed to stats for project", "id", pid, "error", err)
 			}
 		}
-		p.VersionStatusCounts = stats[pid]
+		p.VersionStatusCounts = make(map[dt.RequirementStatus]int)
+		for _, rs := range dt.ALL_RS {
+
+			p.VersionStatusCounts[rs] = stats[pid][rs]
+		}
 	}
 
 	// recipies, err := ph.recipeManager.ListRecipes()

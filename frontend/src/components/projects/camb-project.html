@@ -5,14 +5,7 @@
     <p>Last Update: <span id="updated"></span></p>
     <h2 class="is-size-3">Versions:</h2>
     <nav class="level">
-        <!-- for _, st := range dt.ALL_RS{ -->
-        <div class="level-item has-text-centered">
-            <div>
-                <p class="heading"></p>
-                <p class="title"></p>
-            </div>
-        </div>
-        <!-- } -->
+        <slot name="version-stats">
     </nav>
     <form hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
         <label class="label">Recipe</label>
