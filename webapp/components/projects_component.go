@@ -16,7 +16,7 @@ func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) Projec
 
 	tpl := `<camb-projects>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
-data-href-url="/components/project/{{ .Id }}" data-href-target="#project-details">{{.Name}}</a>
+shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
 	t, err := template.New("projects").Parse(tpl)
 	if err != nil {
@@ -25,7 +25,8 @@ data-href-url="/components/project/{{ .Id }}" data-href-target="#project-details
 	}
 	bh.projectsTpl = t
 
-	tpl = `<p>{{ .Id }}</p>`
+	tpl = `<camb-project data-pid={{.Id}} data-name={{.Name}} data-created={{.CreatedAt}} 
+	data-updated={{.UpdatedAt}}></camb-project>`
 	t, err = template.New("project").Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)

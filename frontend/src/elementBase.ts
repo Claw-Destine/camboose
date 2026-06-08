@@ -1,5 +1,11 @@
 import htmx from 'htmx.org';
 
+export class FieldMapping {
+    source: string
+    targetSelector: string
+    targetAttribute: string | null
+}
+
 // Base for elements with not shadow root
 export class TemplElement extends HTMLElement {
     constructor(tplId: string) {
@@ -16,7 +22,7 @@ export class TemplElement extends HTMLElement {
 
 // Base for elements with shadow root
 export class ShadowTemplElement extends HTMLElement {
-    constructor(tplId: string, useGlobalStyles = false) {
+    constructor(tplId: string, useGlobalStyles = false, fieldMappings: FieldMapping[] = []) {
         super();
         const template = document.getElementById(tplId);
         if (!(template instanceof HTMLTemplateElement)) {
@@ -28,6 +34,7 @@ export class ShadowTemplElement extends HTMLElement {
         shadowRoot.appendChild(document.importNode(templateContent, true));
 
         this.setupSlotLinks()
+        this.copyDataFields(fieldMappings)
 
         if (useGlobalStyles) {
             const globalStyles = document.querySelectorAll('style'); // or any identifier
@@ -57,12 +64,12 @@ export class ShadowTemplElement extends HTMLElement {
                 return;
             }
 
-            const url = link.getAttribute('data-href-url') || link.getAttribute('href');
+            const url = link.getAttribute('shadow-href-url') || link.getAttribute('href');
             if (!url || url === '#') {
                 return;
             }
 
-            const targetId = link.getAttribute('data-href-target')
+            const targetId = link.getAttribute('shadow-href-target')
 
             const target = this.shadowRoot?.querySelector<HTMLElement>(targetId);
             if (!target) {
@@ -73,6 +80,39 @@ export class ShadowTemplElement extends HTMLElement {
             event.stopPropagation();
             htmx.ajax('GET', url, target);
         });
+    }
+
+    copyDataFields(fieldMappings: FieldMapping[]) {
+        const root = this.shadowRoot;
+        const mappings = fieldMappings ?? [];
+
+        if (!root || mappings.length === 0) {
+            return;
+        }
+
+        for (const mapping of mappings) {
+            if (!mapping?.source || !mapping?.targetSelector) {
+                continue;
+            }
+
+            // Read source from host attributes, with a data-* fallback.
+            let value = this.getAttribute(mapping.source);
+            if (value === null && !mapping.source.startsWith('data-')) {
+                value = this.getAttribute(`data-${mapping.source}`);
+            }
+            if (value === null) {
+                continue;
+            }
+
+            const targets = root.querySelectorAll<HTMLElement>(mapping.targetSelector);
+            targets.forEach(target => {
+                if (mapping.targetAttribute) {
+                    target.setAttribute(mapping.targetAttribute, value as string);
+                } else {
+                    target.textContent = value;
+                }
+            });
+        }
     }
 }
 
