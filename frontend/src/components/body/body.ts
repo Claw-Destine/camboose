@@ -2,9 +2,9 @@ import { ShadowTemplElement } from '../../elementBase';
 import bodyTemplate from './camb-body.html';
 import { registerElementWithTemplate } from "../../elementBase";
 import { toggleClass } from '../../utils';
+import htmx from 'htmx.org';
 
 export class CambBody extends ShadowTemplElement {
-    static observedAttributes = ["project-id", "view"];
     projectId = this.getAttribute("project-id");
     view = this.getAttribute("view");
 
@@ -15,6 +15,21 @@ export class CambBody extends ShadowTemplElement {
 
         this.setupMenu(pid, view);
         this.setupQuickProjectMenu();
+        this.loadInitialView(view, pid);
+    }
+
+    loadInitialView(view: string | null, currentPid: string | null) {
+        if (!view) {
+            return
+        }
+        let path = "/components/" + view;
+        if (currentPid) {
+            path = path + "?currentProject=" + currentPid;
+        }
+        const container = this.shadowRoot?.querySelector<HTMLElement>("#main-container");
+        if (container) {
+            htmx.ajax("GET", path, container);
+        }
     }
 
     setupMenu(currentPid: string | null, currentView: string | null) {
@@ -78,9 +93,6 @@ export class CambBody extends ShadowTemplElement {
         projectLinks.forEach(item => setCaption(item, this.shadowRoot));
     }
 
-    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-        console.log(`Attribute ${name} has changed.`);
-    }
 }
 
 export function registerCambBody() {
