@@ -1,6 +1,7 @@
 package components
 
 import (
+	"html/template"
 	"log/slog"
 	"net/http"
 )
@@ -42,4 +43,13 @@ func setViewCookie(view CambView, w http.ResponseWriter) {
 	}
 
 	http.SetCookie(w, &viewCookie)
+}
+
+var funcMap = template.FuncMap{
+	"attr": func(s string) template.HTMLAttr {
+		return template.HTMLAttr(s)
+	},
+	"safe": func(s string) template.HTML {
+		return template.HTML(s)
+	},
 }

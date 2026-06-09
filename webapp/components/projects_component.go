@@ -14,7 +14,7 @@ import (
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
-	tpl := `<camb-projects>
+	tpl := /* content:html */ `<camb-projects>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
 shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
@@ -25,13 +25,14 @@ shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-det
 	}
 	bh.projectsTpl = t
 
-	tpl = `<camb-project data-pid={{.Id}} data-name={{.Name}} data-created={{.CreatedAt}} 
-data-updated={{.UpdatedAt}}>{{range $key,$val := .VersionStatusCounts}}
-<div slot="version-stats" class="level-item has-text-centered">
-<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p>
-</div></div>{{end}}
+	tpl = `<camb-project data-pid={{.Project.Id}} data-name={{.Project.Name}} data-created={{.Project.CreatedAt}} 
+data-updated={{.Project.UpdatedAt}}
+{{if .Project.Recipe}} {{$attr := print "data-curr-recipe=" .Project.Recipe}}{{$attr | attr}}{{end}}
+{{range $idx,$val := .Recipies}}{{$attr := print "data-recipe-" $idx "=" .Id}}{{$attr | attr}}{{end}}>
+{{range $key,$val := .Project.VersionStatusCounts}}<div slot="version-stats" class="level-item has-text-centered">
+<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
 </camb-project>`
-	t, err = template.New("project").Parse(tpl)
+	t, err = template.New("project").Funcs(funcMap).Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
 		log.Panic("exiting")
@@ -56,6 +57,11 @@ const (
 
 type projectsData struct {
 	Projects []dt.Project
+}
+
+type projectData struct {
+	Project  *dt.Project
+	Recipies []dt.Recipe
 }
 
 func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -159,17 +165,19 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 		}
 	}
 
-	// recipies, err := ph.recipeManager.ListRecipes()
-	// if err != nil {
-	// 	slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-
 	switch view {
 	case singleProjectView:
-
-		if err := ph.projectTpl.Execute(w, p); err != nil {
+		recipies, err := ph.recipeManager.ListRecipes()
+		if err != nil {
+			slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		data := projectData{
+			Project:  p,
+			Recipies: recipies,
+		}
+		if err := ph.projectTpl.Execute(w, data); err != nil {
 			slog.Error("Cannot render body component", "err", err)
 			http.Error(w, "failed to render body", http.StatusInternalServerError)
 		}

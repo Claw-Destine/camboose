@@ -15,17 +15,53 @@ export class ProjectsComponent extends ShadowTemplElement {
 export function registerProjectsComponent() {
     registerElementWithTemplate("camb-projects", ProjectsComponent, projectsTemplate);
 }
-const projectMappings = [
-    { source: "data-name", targetSelector: "#title", targetAttribute: null },
-    { source: "data-pid", targetSelector: "#pid", targetAttribute: null },
-    { source: "data-created", targetSelector: "#created", targetAttribute: null },
-    { source: "data-updated", targetSelector: "#updated", targetAttribute: null },
+const projectMappings: FieldMapping[] = [
+    { source: "data-name", targetSelector: "#title" },
+    { source: "data-pid", targetSelector: "#pid" },
+    { source: "data-created", targetSelector: "#created" },
+    { source: "data-updated", targetSelector: "#updated" },
+    { source: "data-recipe", targetSelector: "#recipies", isList: true }
 ];
 export class ProjectComponent extends ShadowTemplElement {
 
     constructor() {
         super("camb-project", true, projectMappings);
+        this.populateRecipiesList();
+    }
 
+    populateRecipiesList() {
+        const recipeSelect = this.shadowRoot?.querySelector('select[name="recipe"]') as HTMLSelectElement | null;
+        if (!recipeSelect) {
+            return;
+        }
+
+        recipeSelect.innerHTML = "";
+        const attrName = "data-curr-recipe";
+        let currRecipe = ""
+        if (this.hasAttribute(attrName)) {
+            currRecipe = this.getAttribute(attrName);
+        }
+        const option = document.createElement("option");
+        option.value = currRecipe;
+        option.textContent = currRecipe;
+        recipeSelect.appendChild(option);
+
+
+        for (let idx = 0; ; idx++) {
+            const attrName = `data-recipe-${idx}`;
+            if (!this.hasAttribute(attrName)) {
+                break;
+            }
+
+            const value = this.getAttribute(attrName) ?? "";
+            if (value === currRecipe) {
+                break;
+            }
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            recipeSelect.appendChild(option);
+        }
     }
 }
 

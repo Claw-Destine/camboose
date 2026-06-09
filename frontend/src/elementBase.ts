@@ -3,7 +3,8 @@ import htmx from 'htmx.org';
 export class FieldMapping {
     source: string
     targetSelector: string
-    targetAttribute: string | null
+    targetAttribute?: string
+    isList?: boolean = false
 }
 
 // Base for elements with not shadow root
