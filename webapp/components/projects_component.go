@@ -15,7 +15,7 @@ import (
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
-	tpl := `<camb-projects data-curr-pid={{.Project.Id}}>
+	tpl := `<camb-projects {{if .Project}}data-curr-pid={{.Project.Id}}{{end}}>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
 shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
@@ -82,7 +82,6 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			ph.displayProjectView(singleProjectView, w, r)
 		case "DELETE":
 			ph.deleteProject(w, r)
-			ph.displayProjectView(allProjectsView, w, r)
 		default:
 			slog.Error("Unknown method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -116,6 +115,8 @@ func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Reque
 		http.Error(w, err.Error(), http.StatusBadRequest)
 
 	}
+	slog.Info("Create project", "id", "pid")
+	http.Redirect(w, r, "/components/body", http.StatusSeeOther)
 }
 
 func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {

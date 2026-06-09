@@ -90,7 +90,7 @@ export class NewProjectModal extends TemplElement {
         const closeBtn = this.querySelector('button[id="close-new-project-btn"]');
         closeBtn.addEventListener("click", _ => { removeElement("new-project-modal", document.body) })
         const npForm = this.querySelector('form[id="new-project-submit"]');
-        closeBtn.addEventListener('click', _ => { removeElement("new-project-modal", document.body) })
+        npForm.addEventListener('htmx:beforeRequest', _ => { removeElement("new-project-modal", document.body) })
         htmx.process(this)
     }
 }
