@@ -33,6 +33,15 @@ export class ProjectComponent extends ShadowTemplElement {
     constructor() {
         super("camb-project", true, projectMappings);
         this.populateRecipiesList();
+        const pid = this.getAttribute("data-pid")
+        this.wireButons(pid)
+    }
+
+    wireButons(pid: string) {
+        const sab = this.shadowRoot.querySelector('button[id="set-active"]') as HTMLButtonElement | null;
+        sab.setAttribute("hx-get", "/components/body?currentProject=" + pid)
+        const db = this.shadowRoot.querySelector('button[id="btn-delete"]') as HTMLButtonElement | null;
+        db.setAttribute("hx-delete", "/components/project/" + pid)
     }
 
     populateRecipiesList() {
@@ -81,7 +90,8 @@ export class NewProjectModal extends TemplElement {
         const closeBtn = this.querySelector('button[id="close-new-project-btn"]');
         closeBtn.addEventListener("click", _ => { removeElement("new-project-modal", document.body) })
         const npForm = this.querySelector('form[id="new-project-submit"]');
-        closeBtn.addEventListener('htmx:before-request', _ => { removeElement("new-project-modal", document.body) })
+        closeBtn.addEventListener('click', _ => { removeElement("new-project-modal", document.body) })
+        htmx.process(this)
     }
 }
 

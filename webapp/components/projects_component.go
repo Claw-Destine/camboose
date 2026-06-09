@@ -1,6 +1,7 @@
 package components
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"log/slog"
@@ -14,7 +15,7 @@ import (
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
-	tpl := `<camb-projects>
+	tpl := `<camb-projects data-curr-pid={{.Project.Id}}>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
 shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
@@ -57,6 +58,7 @@ const (
 
 type projectsData struct {
 	Projects []dt.Project
+	Project  *dt.Project
 }
 
 type projectData struct {
@@ -70,64 +72,64 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
 	} else if strings.HasPrefix(r.URL.Path, "/components/project/") {
-		// 	switch r.Method {
-		// 	case "GET":
-		ph.displayProjectView(singleProjectView, w, r)
-		// 	case "POST":
-		// 		ph.createProject(w, r)
-		// 	case "PUT":
-		// 		ph.updateProject(w, r)
-		// 		ph.displayProjectView(singleProjectView, w, r)
-		// 	case "DELETE":
-		// 		ph.deleteProject(w, r)
-		// 		ph.displayProjectView(allProjectsView, w, r)
-		// 	default:
-		// 		slog.Error("Unknown method", "method", r.Method)
-		// 		http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
-		// 	}
+		switch r.Method {
+		case "GET":
+			ph.displayProjectView(singleProjectView, w, r)
+		case "POST":
+			ph.createProject(w, r)
+		case "PUT":
+			ph.updateProject(w, r)
+			ph.displayProjectView(singleProjectView, w, r)
+		case "DELETE":
+			ph.deleteProject(w, r)
+			ph.displayProjectView(allProjectsView, w, r)
+		default:
+			slog.Error("Unknown method", "method", r.Method)
+			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
+		}
 	} else {
 		slog.Error("Wrong path", "path", r.URL.Path)
 		http.Error(w, "Wrong url", http.StatusBadRequest)
 	}
 }
 
-// func (ph ProjectsCompHandler) updateProject(_ http.ResponseWriter, r *http.Request) {
-// 	urlPart := strings.Split(r.URL.Path, "/")
-// 	pid := urlPart[len(urlPart)-1]
-// 	project := dt.Project{Base: dt.Base{Id: pid}}
+func (ph ProjectsCompHandler) updateProject(_ http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	pid := urlPart[len(urlPart)-1]
+	project := dt.Project{Base: dt.Base{Id: pid}}
 
-// 	r.ParseForm()
-// 	recipe := r.Form.Get("recipe")
-// 	if recipe != "" {
-// 		project.Recipe = recipe
-// 	}
+	r.ParseForm()
+	recipe := r.Form.Get("recipe")
+	if recipe != "" {
+		project.Recipe = recipe
+	}
 
-// 	ph.projectManager.UpdateProject(r.Context(), project)
-// }
+	ph.projectManager.UpdateProject(r.Context(), project)
+}
 
-// func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
-// 	urlPart := strings.Split(r.URL.Path, "/")
-// 	pid := urlPart[len(urlPart)-1]
-// 	err := ph.projectManager.DeleteProject(r.Context(), pid)
-// 	if err != nil {
-// 		slog.Error("Failed to delete project", "id", pid, "error", err)
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
+func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	pid := urlPart[len(urlPart)-1]
+	err := ph.projectManager.DeleteProject(r.Context(), pid)
+	if err != nil {
+		slog.Error("Failed to delete project", "id", pid, "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 
-// 	}
-// }
+	}
+}
 
-// func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {
-// 	r.ParseForm()
-// 	pname := r.Form.Get("name")
-// 	np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
-// 	if err != nil {
-// 		slog.Error("Failed to create the project", "error", err)
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-// 	slog.Info("Create project", "name", pname, "id", np.Id)
-// 	http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
-// }
+func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	pname := r.Form.Get("name")
+	np, err := ph.projectManager.CreateProject(r.Context(), dt.Project{Base: dt.Base{Name: pname}})
+	if err != nil {
+		slog.Error("Failed to create the project", "error", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	slog.Info("Create project", "name", pname, "id", np.Id)
+	http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
+}
 
 func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
 
@@ -190,6 +192,7 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 		}
 		data := projectsData{
 			Projects: projects,
+			Project:  p,
 		}
 
 		if err := ph.projectsTpl.Execute(w, data); err != nil {
