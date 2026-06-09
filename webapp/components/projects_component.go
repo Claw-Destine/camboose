@@ -15,11 +15,11 @@ import (
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
-	tpl := `<camb-projects {{if .Project}}data-curr-pid={{.Project.Id}}{{end}}>
+	tpl := `<camb-projects {{if .Project}}{{$attr := print "data-curr-pid=" .Project.Id}}{{$attr | attr}}{{end}}>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
 shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
-	t, err := template.New("projects").Parse(tpl)
+	t, err := template.New("projects").Funcs(funcMap).Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
 		log.Panic("exiting")

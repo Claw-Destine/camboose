@@ -55,18 +55,23 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if currentProjectId != "" {
 		cp, err := ph.projectManager.GetProjectById(r.Context(), currentProjectId)
+		var projectCookie http.Cookie
 		if err != nil {
-			slog.Error("Failed to load current project", "id", currentProjectId)
+			slog.Info("Failed to load current project", "id", currentProjectId)
+			projectCookie = http.Cookie{
+				Name:   "project",
+				MaxAge: -1,
+			}
 		} else {
 			currentProject = cp
-			projectCookie := http.Cookie{
+			projectCookie = http.Cookie{
 				Name:     "project",
 				Value:    currentProjectId,
 				SameSite: http.SameSiteLaxMode,
 			}
 
-			http.SetCookie(w, &projectCookie)
 		}
+		http.SetCookie(w, &projectCookie)
 	}
 	var currentView string
 	viewCookie, err := r.Cookie("view")
