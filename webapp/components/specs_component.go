@@ -1,7 +1,9 @@
 package components
 
 import (
-	"io"
+	"html/template"
+	"log"
+	"log/slog"
 	"net/http"
 
 	pm "claw-destine.com/camboose/core/controllers/projects"
@@ -9,17 +11,29 @@ import (
 )
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
-	return SpecsCompHandler{projectsCtl: pm, specsCtl: sm}
+	tpl := `<camb-specs></camb-specs>	`
+
+	t, err := template.New("main-body").Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	return SpecsCompHandler{projectsCtl: pm, specsCtl: sm, specsViewTmpl: t}
 }
 
 type SpecsCompHandler struct {
-	projectsCtl *pm.ProjectControler
-	specsCtl    *specs.SpecsController
+	projectsCtl   *pm.ProjectControler
+	specsCtl      *specs.SpecsController
+	specsViewTmpl *template.Template
 }
 
 func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	setViewCookie(vRecipies, w)
-	io.WriteString(w, "specs")
+	setViewCookie(vSpecs, w)
+
+	if err := sh.specsViewTmpl.Execute(w, nil); err != nil {
+		slog.Error("Cannot render specs component", "err", err)
+		http.Error(w, "failed to render specs", http.StatusInternalServerError)
+	}
 }
 
 // 	var p *dt.Project
@@ -81,9 +95,6 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // 		http.Error(w, "Wrong url", http.StatusBadRequest)
 // 	}
 
-// }
-// func (sh SpecsCompHandler) displaySpecsPage(p *dt.Project, si []dt.Version, w http.ResponseWriter, r *http.Request) {
-// 	specsComponent(p, si).Render(r.Context(), w)
 // }
 
 // func (sh SpecsCompHandler) displayVersionList(si []dt.Version, w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,40 @@
+<div id={ "ver_" + si.Id} class="box container is-fluid">
+    <button class="delete is-pulled-right" hx-confirm="This will permanently delete the version. Are you sure?"
+        hx-delete={"/components/version/" + si.Id } hx-swap="outerHTML" hx-target={ "#ver_" + si.Id}></button>
+    <div class="level" onclick="toggleClass( 'cont_' + this.parentNode.id , 'is-hidden')">
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Name</p>
+                <p><b>{ si.Name }</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Description</p>
+                <p><b>{ si.Description }</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Status</p>
+                <p><b>{ si.Status }</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <button class="button" onclick="showElement('editversion');event.stopPropagation()">Edit</button>
+            </div>
+        </div>
+        for _, st := range dt.ALL_RS{
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">{st}</p>
+                <p><b>{ si.StoryStatusCounts[st]}</b></p>
+            </div>
+        </div>
+        }
+    </div>
+    <div id={ "cont_ver_" + si.Id} class="is-hidden">hidden
+    </div>
+
+</div>
