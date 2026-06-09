@@ -8,10 +8,13 @@ import (
 
 	pm "claw-destine.com/camboose/core/controllers/projects"
 	"claw-destine.com/camboose/core/controllers/specs"
+	dt "claw-destine.com/camboose/core/datatypes"
 )
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
-	tpl := `<camb-specs></camb-specs>	`
+	tpl := `<camb-specs>{{range .Versions}}
+	<version-item slot="version-list"></version-item>
+	{{end}}</camb-specs>	`
 
 	t, err := template.New("main-body").Parse(tpl)
 	if err != nil {
@@ -27,37 +30,47 @@ type SpecsCompHandler struct {
 	specsViewTmpl *template.Template
 }
 
+type specsViewData struct {
+	Project  *dt.Project
+	Versions []dt.Version
+}
+
 func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	setViewCookie(vSpecs, w)
 
-	if err := sh.specsViewTmpl.Execute(w, nil); err != nil {
+	var p *dt.Project
+	var err error
+	var vs []dt.Version
+
+	pid := r.URL.Query().Get("currentProject")
+
+	if pid != "" && r.Method == http.MethodGet {
+		p, err = sh.projectsCtl.GetProjectById(r.Context(), pid)
+		if err != nil {
+			slog.Error("Failed to fetch versions for project", "id", pid, "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		vs, err = sh.specsCtl.ListVersions(p.Id)
+		statCounts, err := sh.specsCtl.VersionStatistics(vs)
+		if err != nil {
+			slog.Error("Failed to fetch versions statistics for project", "id", pid, "error", err)
+		}
+		for idx, s := range vs {
+			vs[idx].StoryStatusCounts = statCounts[s.Id]
+		}
+	}
+
+	data := specsViewData{
+		Project:  p,
+		Versions: vs,
+	}
+
+	if err := sh.specsViewTmpl.Execute(w, data); err != nil {
 		slog.Error("Cannot render specs component", "err", err)
 		http.Error(w, "failed to render specs", http.StatusInternalServerError)
 	}
 }
-
-// 	var p *dt.Project
-// 	var err error
-// 	var si []dt.Version
-
-// 	pid := r.URL.Query().Get("currentProject")
-
-// 	if pid != "" && r.Method == http.MethodGet {
-// 		p, err = sh.projectsCtl.GetProjectById(r.Context(), pid)
-// 		if err != nil {
-// 			slog.Error("Failed to fetch versions for project", "id", pid, "error", err)
-// 			http.Error(w, err.Error(), http.StatusBadRequest)
-// 			return
-// 		}
-// 		si, err = sh.specsCtl.ListVersions(p.Id)
-// 		statCounts, err := sh.specsCtl.VersionStatistics(si)
-// 		if err != nil {
-// 			slog.Error("Failed to fetch versions statistics for project", "id", pid, "error", err)
-// 		}
-// 		for idx, s := range si {
-// 			si[idx].StoryStatusCounts = statCounts[s.Id]
-// 		}
-// 	}
 
 // 	if strings.HasPrefix(r.URL.Path, "/components/specs") {
 // 		switch r.Method {
