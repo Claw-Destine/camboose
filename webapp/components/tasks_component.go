@@ -15,5 +15,5 @@ type TasksCompHandler struct {
 func (ph TasksCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	setViewCookie(vTasks, w)
-	io.WriteString(w, "tasks")
+	io.WriteString(w, `<h1 class="title">Tasks</h1>`)
 }
