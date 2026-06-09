@@ -1,15 +1,21 @@
-import { FieldMapping, ShadowTemplElement } from '../../elementBase';
+import { FieldMapping, ShadowTemplElement, TemplElement } from '../../elementBase';
 import projectsTemplate from './camb-projects.html';
 import projectTemplate from './camb-project.html';
+import newProjectModalTemplate from './new-project-modal.html'
 import { registerElementWithTemplate } from '../../elementBase';
 import htmx from 'htmx.org';
+import { insertCustomElement, removeElement } from '../../utils';
 
 export class ProjectsComponent extends ShadowTemplElement {
     constructor() {
         super("camb-projects", true);
+        this.wireButtons();
     }
 
-
+    wireButtons() {
+        const npb = this.shadowRoot.querySelector('button[id="new-project"]') as HTMLButtonElement | null;
+        npb.addEventListener('click', _ => { insertCustomElement('<new-project-modal id="new-project-modal"></new-project-modal>', document.body) })
+    }
 }
 
 export function registerProjectsComponent() {
@@ -67,4 +73,18 @@ export class ProjectComponent extends ShadowTemplElement {
 
 export function registerProjectComponent() {
     registerElementWithTemplate("camb-project", ProjectComponent, projectTemplate);
+}
+
+export class NewProjectModal extends TemplElement {
+    constructor() {
+        super("new-project-modal")
+        const closeBtn = this.querySelector('button[id="close-new-project-btn"]');
+        closeBtn.addEventListener("click", _ => { removeElement("new-project-modal", document.body) })
+        const npForm = this.querySelector('form[id="new-project-submit"]');
+        closeBtn.addEventListener('htmx:before-request', _ => { removeElement("new-project-modal", document.body) })
+    }
+}
+
+export function registerNewProjectModal() {
+    registerElementWithTemplate("new-project-modal", NewProjectModal, newProjectModalTemplate)
 }

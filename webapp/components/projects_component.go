@@ -14,7 +14,7 @@ import (
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
-	tpl := /* content:html */ `<camb-projects>
+	tpl := `<camb-projects>
 {{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
 shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`

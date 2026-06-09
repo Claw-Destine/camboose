@@ -1,0 +1,19 @@
+<div id="newproject" class="modal is-active">
+    <div class="modal-background" onclick="hideElement('newproject')"></div>
+    <div class=" modal-content">
+        <div class="box">
+            <h3 class="is-size-4">Create new project</h3>
+            <!-- <form action="/components/project" method="post"> -->
+            <form id="new-project-submit" hx-post="/components/project" hx-swap="outerHTML" hx-target="#main-body">
+                <div class="field">
+                    <label class="label">Project Name</label>
+                    <input class="input" name="name" type="text" placeholder="Input project name">
+                </div>
+                <div class="field">
+                    <input type="submit" class="button is-link" value="Create">
+                </div>
+            </form>
+        </div>
+    </div>
+    <button id="close-new-project-btn" class="modal-close is-large" aria-label="close"></button>
+</div>
