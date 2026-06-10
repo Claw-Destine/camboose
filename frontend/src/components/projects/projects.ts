@@ -13,7 +13,7 @@ export class ProjectsComponent extends ShadowTemplElement {
     }
 
     wireButtons() {
-        const npb = this.shadowRoot.querySelector('button[id="new-project"]') as HTMLButtonElement | null;
+        const npb = this.root().querySelector('button[id="new-project"]') as HTMLButtonElement | null;
         npb.addEventListener('click', _ => { insertCustomElement('<new-project-modal id="new-project-modal"></new-project-modal>', document.body) })
     }
 }
@@ -28,24 +28,26 @@ const projectMappings: FieldMapping[] = [
     { source: "data-updated", targetSelector: "#updated" },
     { source: "data-recipe", targetSelector: "#recipies", isList: true }
 ];
-export class ProjectComponent extends ShadowTemplElement {
+export class ProjectComponent extends TemplElement {
 
     constructor() {
-        super("camb-project", true, projectMappings);
+        super("camb-project", projectMappings, ["version-stats"]);
         this.populateRecipiesList();
         const pid = this.getAttribute("data-pid")
         this.wireButons(pid)
     }
 
     wireButons(pid: string) {
-        const sab = this.shadowRoot.querySelector('button[id="set-active"]') as HTMLButtonElement | null;
+        const sab = this.root().querySelector('button[id="set-active"]') as HTMLButtonElement | null;
         sab.setAttribute("hx-get", "/components/body?currentProject=" + pid)
-        const db = this.shadowRoot.querySelector('button[id="btn-delete"]') as HTMLButtonElement | null;
+        const db = this.root().querySelector('button[id="btn-delete"]') as HTMLButtonElement | null;
         db.setAttribute("hx-delete", "/components/project/" + pid)
+        const epf = this.root().querySelector('form[id="edit-project"]') as HTMLFormElement | null;
+        epf.setAttribute("hx-put", "/components/project/" + pid)
     }
 
     populateRecipiesList() {
-        const recipeSelect = this.shadowRoot?.querySelector('select[name="recipe"]') as HTMLSelectElement | null;
+        const recipeSelect = this.root()?.querySelector('select[name="recipe"]') as HTMLSelectElement | null;
         if (!recipeSelect) {
             return;
         }

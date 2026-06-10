@@ -1,4 +1,4 @@
-<div class="block">
+<div id="root" class="block">
     <h1 id="title" class="title"></h1>
     <h2 class="subtitle">Id: <span id="pid"></span></h2>
     <p>Created At: <span id="created"></span></p>
@@ -7,7 +7,7 @@
     <nav class="level">
         <slot name="version-stats">
     </nav>
-    <form hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
+    <form id="edit-project" hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
         <label class="label">Recipe</label>
         <div class="select is-primary">
             <select name="recipe">

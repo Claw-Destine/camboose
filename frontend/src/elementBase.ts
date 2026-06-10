@@ -9,7 +9,7 @@ export class FieldMapping {
 
 // Base for elements with not shadow root
 export class TemplElement extends HTMLElement {
-    constructor(tplId: string, fieldMappings: FieldMapping[] = []) {
+    constructor(tplId: string, fieldMappings: FieldMapping[] = [], fakeSlots: string[] = []) {
         super();
         this.setupRoot();
         const template = document.getElementById(tplId);
@@ -21,7 +21,7 @@ export class TemplElement extends HTMLElement {
         this.root().appendChild(document.importNode(templateContent, true));
 
 
-        this.setupSlotLinks()
+        this.processFakeSlots(fakeSlots)
         this.copyDataFields(fieldMappings)
     }
 
@@ -33,36 +33,17 @@ export class TemplElement extends HTMLElement {
         return this
     }
 
-    protected setupSlotLinks() {
-        const slots = this.root()?.querySelectorAll<HTMLSlotElement>('slot');
-        if (slots.length == 0) {
-            return;
+    private processFakeSlots(fakeSlots: string[]) {
+        for (const sn of fakeSlots) {
+            const slot = this.root().querySelector('slot[name="' + sn + '"]')?.parentNode
+            const slottables = this.root().querySelectorAll('[slot=' + sn + ']')
+            for (const sl of slottables) {
+                slot.appendChild(sl)
+            }
         }
-        const slot = slots[0]
-        slot.addEventListener('click', event => {
-            const path = event.composedPath();
-            const link = path.find(node => node instanceof HTMLAnchorElement);
-            if (!(link instanceof HTMLAnchorElement)) {
-                return;
-            }
-
-            const url = link.getAttribute('shadow-href-url') || link.getAttribute('href');
-            if (!url || url === '#') {
-                return;
-            }
-
-            const targetId = link.getAttribute('shadow-href-target')
-
-            const target = this.root()?.querySelector<HTMLElement>(targetId);
-            if (!target) {
-                return;
-            }
-
-            event.preventDefault();
-            event.stopPropagation();
-            htmx.ajax('GET', url, target);
-        });
     }
+
+
 
     protected copyDataFields(fieldMappings: FieldMapping[]) {
         const root = this.root();
@@ -101,8 +82,8 @@ export class TemplElement extends HTMLElement {
 // Base for elements with shadow root
 export class ShadowTemplElement extends TemplElement {
     constructor(tplId: string, useGlobalStyles = false, fieldMappings: FieldMapping[] = []) {
-        super(tplId, fieldMappings);
-
+        super(tplId, fieldMappings, []);
+        this.setupSlotLinks()
         if (useGlobalStyles) {
             const globalStyles = document.querySelectorAll('style'); // or any identifier
             globalStyles.forEach(style => {
@@ -119,11 +100,43 @@ export class ShadowTemplElement extends TemplElement {
         return this.shadowRoot;
     }
 
+
     connectedCallback() {
         // htmx does not auto-scan shadow roots; process this component root explicitly.
         if (htmx && typeof htmx.process === 'function') {
             htmx.process(this.shadowRoot);
         }
+    }
+
+    protected setupSlotLinks() {
+        const slots = this.root()?.querySelectorAll<HTMLSlotElement>('slot');
+        if (slots.length == 0) {
+            return;
+        }
+        const slot = slots[0]
+        slot.addEventListener('click', event => {
+            const path = event.composedPath();
+            const link = path.find(node => node instanceof HTMLAnchorElement);
+            if (!(link instanceof HTMLAnchorElement)) {
+                return;
+            }
+
+            const url = link.getAttribute('shadow-href-url') || link.getAttribute('href');
+            if (!url || url === '#') {
+                return;
+            }
+
+            const targetId = link.getAttribute('shadow-href-target')
+
+            const target = this.root()?.querySelector<HTMLElement>(targetId);
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            htmx.ajax('GET', url, target);
+        });
     }
 
 
