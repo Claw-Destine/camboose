@@ -9,51 +9,32 @@ export class FieldMapping {
 
 // Base for elements with not shadow root
 export class TemplElement extends HTMLElement {
-    constructor(tplId: string) {
+    constructor(tplId: string, fieldMappings: FieldMapping[] = []) {
         super();
+        this.setupRoot();
         const template = document.getElementById(tplId);
         if (!(template instanceof HTMLTemplateElement)) {
             return;
         }
 
         const templateContent = template.content;
-        this.appendChild(document.importNode(templateContent, true));
-    }
-}
+        this.root().appendChild(document.importNode(templateContent, true));
 
-// Base for elements with shadow root
-export class ShadowTemplElement extends HTMLElement {
-    constructor(tplId: string, useGlobalStyles = false, fieldMappings: FieldMapping[] = []) {
-        super();
-        const template = document.getElementById(tplId);
-        if (!(template instanceof HTMLTemplateElement)) {
-            return;
-        }
-
-        const templateContent = template.content;
-        const shadowRoot = this.attachShadow({ mode: "open" });
-        shadowRoot.appendChild(document.importNode(templateContent, true));
 
         this.setupSlotLinks()
         this.copyDataFields(fieldMappings)
-
-        if (useGlobalStyles) {
-            const globalStyles = document.querySelectorAll('style'); // or any identifier
-            globalStyles.forEach(style => {
-                shadowRoot.appendChild(style.cloneNode(true));
-            });
-        }
     }
 
-    connectedCallback() {
-        // htmx does not auto-scan shadow roots; process this component root explicitly.
-        if (htmx && typeof htmx.process === 'function') {
-            htmx.process(this.shadowRoot);
-        }
+    protected setupRoot() {
+
     }
 
-    setupSlotLinks() {
-        const slots = this.shadowRoot?.querySelectorAll<HTMLSlotElement>('slot');
+    protected root(): ParentNode {
+        return this
+    }
+
+    protected setupSlotLinks() {
+        const slots = this.root()?.querySelectorAll<HTMLSlotElement>('slot');
         if (slots.length == 0) {
             return;
         }
@@ -72,7 +53,7 @@ export class ShadowTemplElement extends HTMLElement {
 
             const targetId = link.getAttribute('shadow-href-target')
 
-            const target = this.shadowRoot?.querySelector<HTMLElement>(targetId);
+            const target = this.root()?.querySelector<HTMLElement>(targetId);
             if (!target) {
                 return;
             }
@@ -83,8 +64,8 @@ export class ShadowTemplElement extends HTMLElement {
         });
     }
 
-    copyDataFields(fieldMappings: FieldMapping[]) {
-        const root = this.shadowRoot;
+    protected copyDataFields(fieldMappings: FieldMapping[]) {
+        const root = this.root();
         const mappings = fieldMappings ?? [];
 
         if (!root || mappings.length === 0) {
@@ -115,6 +96,37 @@ export class ShadowTemplElement extends HTMLElement {
             });
         }
     }
+}
+
+// Base for elements with shadow root
+export class ShadowTemplElement extends TemplElement {
+    constructor(tplId: string, useGlobalStyles = false, fieldMappings: FieldMapping[] = []) {
+        super(tplId, fieldMappings);
+
+        if (useGlobalStyles) {
+            const globalStyles = document.querySelectorAll('style'); // or any identifier
+            globalStyles.forEach(style => {
+                this.root().appendChild(style.cloneNode(true));
+            });
+        }
+    }
+
+    protected setupRoot() {
+        this.attachShadow({ mode: "open" });
+    }
+
+    protected root(): ParentNode {
+        return this.shadowRoot;
+    }
+
+    connectedCallback() {
+        // htmx does not auto-scan shadow roots; process this component root explicitly.
+        if (htmx && typeof htmx.process === 'function') {
+            htmx.process(this.shadowRoot);
+        }
+    }
+
+
 }
 
 export function registerElementWithTemplate(
