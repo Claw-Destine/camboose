@@ -1,4 +1,4 @@
-import { registerElementWithTemplate, ShadowTemplElement, TemplElement } from "../../elementBase";
+import { FieldMapping, registerElementWithTemplate, ShadowTemplElement, TemplElement } from "../../elementBase";
 import specsTemplate from "./camb-specs.html"
 import versionItemTemplate from "./version-item.html"
 
@@ -12,10 +12,19 @@ export class SpecsComponent extends ShadowTemplElement {
 export function registerSpecsComponent() {
     registerElementWithTemplate("camb-specs", SpecsComponent, specsTemplate);
 }
-
+const specMappings: FieldMapping[] = [{
+    source: "data-name",
+    targetSelector: 'b[name="vi-name"]'
+}, {
+    source: "data-desc",
+    targetSelector: 'b[name="vi-desc"]'
+}, {
+    source: "data-status",
+    targetSelector: 'b[name="vi-status"]'
+}]
 export class VersionItem extends TemplElement {
     constructor() {
-        super("version-item")
+        super("version-item", specMappings, ["vi-story-status"])
     }
 }
 

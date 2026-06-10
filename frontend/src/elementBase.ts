@@ -5,6 +5,7 @@ export class FieldMapping {
     targetSelector: string
     targetAttribute?: string
     isList?: boolean = false
+    appendId?: boolean = false
 }
 
 // Base for elements with not shadow root
@@ -42,8 +43,6 @@ export class TemplElement extends HTMLElement {
             }
         }
     }
-
-
 
     protected copyDataFields(fieldMappings: FieldMapping[]) {
         const root = this.root();

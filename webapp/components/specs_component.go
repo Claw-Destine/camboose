@@ -13,10 +13,15 @@ import (
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
 	tpl := `<camb-specs>{{range .Versions}}
-	<version-item slot="version-list"></version-item>
-	{{end}}</camb-specs>	`
+<version-item slot="version-list" data-id={{.Id}} data-name={{.Name}} 
+{{if .Description}}{{$attr := print "data-desc=" .Description}}{{$attr | attr}}{{end}}
+data-status={{.Status}}>
+{{range $key,$val := .StoryStatusCounts}}<div slot="vi-story-status" class="level-item has-text-centered">
+<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
+</version-item>
+{{end}}</camb-specs>`
 
-	t, err := template.New("main-body").Parse(tpl)
+	t, err := template.New("main-body").Funcs(funcMap).Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
 		log.Panic("exiting")
@@ -57,7 +62,10 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			slog.Error("Failed to fetch versions statistics for project", "id", pid, "error", err)
 		}
 		for idx, s := range vs {
-			vs[idx].StoryStatusCounts = statCounts[s.Id]
+			vs[idx].StoryStatusCounts = make(map[dt.RequirementStatus]int)
+			for _, rs := range dt.ALL_RS {
+				vs[idx].StoryStatusCounts[rs] = statCounts[s.Id][rs]
+			}
 		}
 	}
 
