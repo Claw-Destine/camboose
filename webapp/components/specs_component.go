@@ -2,9 +2,11 @@ package components
 
 import (
 	"html/template"
+	"io"
 	"log"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	pm "claw-destine.com/camboose/core/controllers/projects"
 	"claw-destine.com/camboose/core/controllers/specs"
@@ -12,16 +14,21 @@ import (
 )
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
-	tpl := `<camb-specs>{{range .Versions}}
+	tpl := `<camb-specs data-project={{.Project.Id}}>
+{{template "versions-list" .Versions}}
+</camb-specs>
+
+{{define "versions-list"}}
+{{range .}}
 <version-item slot="version-list" data-id={{.Id}} data-name={{.Name}} 
-{{if .Description}}{{$attr := print "data-desc=" .Description}}{{$attr | attr}}{{end}}
+{{if .Description}}{{$attr1 := print "data-desc=" .Description}}{{$attr1 | attr}}{{end}}
 data-status={{.Status}}>
 {{range $key,$val := .StoryStatusCounts}}<div slot="vi-story-status" class="level-item has-text-centered">
 <div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
-</version-item>
-{{end}}</camb-specs>`
+</version-item>{{end}}
+{{end}}`
 
-	t, err := template.New("main-body").Funcs(funcMap).Parse(tpl)
+	t, err := template.New("specs-view").Funcs(funcMap).Parse(tpl)
 	if err != nil {
 		slog.Error("Cannot parse template", "err", err)
 		log.Panic("exiting")
@@ -41,8 +48,6 @@ type specsViewData struct {
 }
 
 func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	setViewCookie(vSpecs, w)
-
 	var p *dt.Project
 	var err error
 	var vs []dt.Version
@@ -69,6 +74,45 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if strings.HasPrefix(r.URL.Path, "/components/specs") {
+		switch r.Method {
+		case "GET":
+			setViewCookie(vSpecs, w)
+		default:
+			slog.Error("Unsupported method", "method", r.Method)
+			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
+		}
+		// Order matters
+	} else if strings.HasPrefix(r.URL.Path, "/components/versions") {
+		switch r.Method {
+		case "GET":
+			if err := sh.specsViewTmpl.ExecuteTemplate(w, "versions-list", vs); err != nil {
+				slog.Error("Cannot render versions-list", "err", err)
+				http.Error(w, "failed to render versions", http.StatusInternalServerError)
+			}
+			return
+		default:
+			slog.Error("Unsupported method", "method", r.Method)
+			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
+		}
+	} else if strings.HasPrefix(r.URL.Path, "/components/version") {
+		switch r.Method {
+		case "POST":
+			sh.createVersion(r)
+			http.Redirect(w, r, appendQueryParams("/components/versions", qkCurrProj, pid), http.StatusSeeOther)
+		case http.MethodDelete:
+			sh.deleteVersion(r)
+			// Return empty string for swap
+			io.WriteString(w, "")
+		default:
+			slog.Error("Unsupported method", "method", r.Method)
+			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
+		}
+	} else {
+		slog.Error("Wrong path", "path", r.URL.Path)
+		http.Error(w, "Wrong url", http.StatusBadRequest)
+	}
+
 	data := specsViewData{
 		Project:  p,
 		Versions: vs,
@@ -80,58 +124,17 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// 	if strings.HasPrefix(r.URL.Path, "/components/specs") {
-// 		switch r.Method {
-// 		case "GET":
-// 			setViewCookie(vSpecs, w)
-// 			sh.displaySpecsPage(p, si, w, r)
-// 		default:
-// 			slog.Error("Unsupported method", "method", r.Method)
-// 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
-// 		}
-// 		// Order matters
-// 	} else if strings.HasPrefix(r.URL.Path, "/components/versions") {
-// 		switch r.Method {
-// 		case "GET":
-// 			sh.displayVersionList(si, w, r)
-// 		default:
-// 			slog.Error("Unsupported method", "method", r.Method)
-// 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
-// 		}
-// 	} else if strings.HasPrefix(r.URL.Path, "/components/version") {
-// 		switch r.Method {
-// 		case "POST":
-// 			sh.createVersion(*p, r)
-// 			http.Redirect(w, r, appendQueryParams("/components/versions", qkCurrProj, pid), http.StatusSeeOther)
-// 		case http.MethodDelete:
-// 			sh.deleteVersion(r)
-// 			// Return empty string for swap
-// 			io.WriteString(w, "")
-// 		default:
-// 			slog.Error("Unsupported method", "method", r.Method)
-// 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
-// 		}
-// 	} else {
-// 		slog.Error("Wrong path", "path", r.URL.Path)
-// 		http.Error(w, "Wrong url", http.StatusBadRequest)
-// 	}
+func (sh SpecsCompHandler) createVersion(r *http.Request) {
+	r.ParseForm()
+	version_name := r.Form.Get("version_name")
+	pid := r.Form.Get("pid")
+	s := dt.Version{ProjectId: pid}
+	s.Name = version_name
+	sh.specsCtl.CreateVersion(s)
+}
 
-// }
-
-// func (sh SpecsCompHandler) displayVersionList(si []dt.Version, w http.ResponseWriter, r *http.Request) {
-// 	versionList(si).Render(r.Context(), w)
-// }
-
-// func (sh SpecsCompHandler) createVersion(project dt.Project, r *http.Request) {
-// 	r.ParseForm()
-// 	version_name := r.Form.Get("name")
-// 	s := dt.Version{ProjectId: project.Id}
-// 	s.Name = version_name
-// 	sh.specsCtl.CreateVersion(s)
-// }
-
-// func (sh SpecsCompHandler) deleteVersion(r *http.Request) {
-// 	urlPart := strings.Split(r.URL.Path, "/")
-// 	vid := urlPart[len(urlPart)-1]
-// 	sh.specsCtl.DeleteVersionById(vid)
-// }
+func (sh SpecsCompHandler) deleteVersion(r *http.Request) {
+	urlPart := strings.Split(r.URL.Path, "/")
+	vid := urlPart[len(urlPart)-1]
+	sh.specsCtl.DeleteVersionById(vid)
+}

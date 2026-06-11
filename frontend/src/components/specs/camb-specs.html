@@ -1,10 +1,9 @@
 <div class="box">
-    <form hx-post={ appendQueryParams("/components/version", qkCurrProj, currentProject.Id )}
-        hx-target="#versionlist-container">
+    <form id="new-version-form">
         <div class="container is-fluid">
             <b>Create a new version / epic:</b>
             <label class="cbs_hform_item" for="version_name">Name</label>
-            <input class="cbs_hform_item" type="text" id="version_name" name="name">
+            <input class="cbs_hform_item" type="text" id="version_name" name="version_name">
             <input class="cbs_hform_item" type="submit" value="create">
         </div>
     </form>
