@@ -104,6 +104,7 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			sh.deleteVersion(r)
 			// Return empty string for swap
 			io.WriteString(w, "")
+			return
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)

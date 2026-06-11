@@ -1,5 +1,5 @@
 <div name="vi-root" class="box container is-fluid">
-    <button name="vi-delete" class="delete is-pulled-right"
+    <button name="vi-delete" class="delete is-pulled-right" hx-target="closest div"
         hx-confirm="This will permanently delete the version. Are you sure?" hx-swap="outerHTML"></button>
     <div class="level" onclick="toggleClass( 'cont_' + this.parentNode.id , 'is-hidden')">
         <div class="level-item has-text-centered">

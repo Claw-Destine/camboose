@@ -48,10 +48,14 @@ const versionMapping: FieldMapping[] = [{
 }, {
     source: "data-status",
     targetSelector: 'b[name="vi-status"]'
-}]
+}
+]
 export class VersionItem extends TemplElement {
     constructor() {
         super("version-item", versionMapping, ["vi-story-status"])
+        const vid = this.getAttribute("data-id")
+        const delBtn = (this.getRootNode() as ParentNode).querySelector('button[name="vi-delete"]')
+        delBtn.setAttribute("hx-delete", "/components/version/" + vid)
     }
 }
 
