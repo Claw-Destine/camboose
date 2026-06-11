@@ -10,7 +10,7 @@ Recipe driven software development AI workflow orchestrator
 |- recipies # Example recipies
 |- core # GoLang - application logic
 |- webapp # HTMX fragment renderer
-|- frontend # Webpack project wih web components
+|- frontend # Webpack project with web components
 ```
 
 ## 3rd Pary software

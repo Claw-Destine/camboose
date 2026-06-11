@@ -58,7 +58,7 @@ export class VersionItem extends TemplElement {
         const vid = this.getAttribute("data-id")
         const delBtn = this.querySelector('button[name="vi-delete"]')
         delBtn.setAttribute("hx-delete", "/components/version/" + vid)
-        const npb = this.querySelector('button[name="vi-edit"]') as HTMLButtonElement | null;
+        const npb = this.querySelector('button[name="vi-edit-btn"]') as HTMLButtonElement | null;
         npb.addEventListener('click', _ => {
             console.log("edit version");
             insertCustomElement('<edit-version-modal id="edit-version-modal"></edit-version-modal>',

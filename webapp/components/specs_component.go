@@ -24,7 +24,7 @@ func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCo
 {{if .Description}}{{$attr1 := print "data-desc=" .Description}}{{$attr1 | attr}}{{end}}
 data-status={{.Status}}>
 {{range $key,$val := .StoryStatusCounts}}<div slot="vi-story-status" class="level-item has-text-centered">
-<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
+<div><p class="heading">{{$key}}</p><p class="has-text-weight-semibold is-size-4">{{$val}}</p></div></div>{{end}}
 </version-item>{{end}}
 {{end}}`
 
