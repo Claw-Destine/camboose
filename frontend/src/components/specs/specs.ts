@@ -2,6 +2,8 @@ import htmx from "htmx.org";
 import { FieldMapping, registerElementWithTemplate, ShadowTemplElement, TemplElement } from "../../elementBase";
 import specsTemplate from "./camb-specs.html"
 import versionItemTemplate from "./version-item.html"
+import editVersionModalTemplate from "./edit-version-modal.html"
+import { insertCustomElement, removeElement } from "../../utils";
 
 
 
@@ -54,11 +56,31 @@ export class VersionItem extends TemplElement {
     constructor() {
         super("version-item", versionMapping, ["vi-story-status"])
         const vid = this.getAttribute("data-id")
-        const delBtn = (this.getRootNode() as ParentNode).querySelector('button[name="vi-delete"]')
+        const delBtn = this.querySelector('button[name="vi-delete"]')
         delBtn.setAttribute("hx-delete", "/components/version/" + vid)
+        const npb = this.querySelector('button[name="vi-edit"]') as HTMLButtonElement | null;
+        npb.addEventListener('click', _ => {
+            console.log("edit version");
+            insertCustomElement('<edit-version-modal id="edit-version-modal"></edit-version-modal>',
+                document.body);
+        })
     }
 }
 
 export function registerVersionItem() {
     registerElementWithTemplate("version-item", VersionItem, versionItemTemplate)
+}
+const EDIT_VERSION_MODAL = "edit-version-modal"
+export class EditVersionModal extends TemplElement {
+    constructor() {
+        super(EDIT_VERSION_MODAL)
+
+        const closeBtn = this.querySelectorAll('[function="close-edit-version"]');
+        closeBtn.forEach(item => item.addEventListener("click", _ => { removeElement(EDIT_VERSION_MODAL, document.body) }))
+        htmx.process(this)
+    }
+}
+
+export function registerEditVersionModal() {
+    registerElementWithTemplate(EDIT_VERSION_MODAL, EditVersionModal, editVersionModalTemplate)
 }

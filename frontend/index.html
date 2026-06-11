@@ -12,17 +12,7 @@
         <button class="delete" onclick="hideNotification('notification-bar')"></button>
         <div id="notification-msg">Error</div>
     </div>
-
     <div class="columns" id="main-body" hx-get="/components/body" hx-trigger="load" hx-swap="outerHTML">
-    </div>
-    <div id="editversion" class="modal">
-        <div class="modal-background" onclick="hideElement('editversion')"></div>
-        <div class=" modal-content">
-            <div class="box">
-                <h3 class="is-size-4">Edit version</h3>
-            </div>
-            <button class="modal-close is-large" aria-label="close" onclick="hideElement('editversion')"></button>
-        </div>
     </div>
 </body>
 
