@@ -1,7 +1,9 @@
 package components
 
 import (
+	"html/template"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -12,19 +14,43 @@ import (
 )
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
-	return SpecsCompHandler{projectsCtl: pm, specsCtl: sm}
+	tpl := `<camb-specs data-project={{.Project.Id}}>
+{{template "versions-list" .Versions}}
+</camb-specs>
+
+{{define "versions-list"}}
+{{range .}}
+<version-item slot="version-list" data-id={{.Id}} data-name={{.Name}} 
+{{if .Description}}{{$attr1 := print "data-desc=" .Description}}{{$attr1 | attr}}{{end}}
+data-status={{.Status}}>
+{{range $key,$val := .StoryStatusCounts}}<div slot="vi-story-status" class="level-item has-text-centered">
+<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
+</version-item>{{end}}
+{{end}}`
+
+	t, err := template.New("specs-view").Funcs(funcMap).Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	return SpecsCompHandler{projectsCtl: pm, specsCtl: sm, specsViewTmpl: t}
 }
 
 type SpecsCompHandler struct {
-	projectsCtl *pm.ProjectControler
-	specsCtl    *specs.SpecsController
+	projectsCtl   *pm.ProjectControler
+	specsCtl      *specs.SpecsController
+	specsViewTmpl *template.Template
+}
+
+type specsViewData struct {
+	Project  *dt.Project
+	Versions []dt.Version
 }
 
 func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	var p *dt.Project
 	var err error
-	var si []dt.Version
+	var vs []dt.Version
 
 	pid := r.URL.Query().Get("currentProject")
 
@@ -35,13 +61,16 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		si, err = sh.specsCtl.ListVersions(p.Id)
-		statCounts, err := sh.specsCtl.VersionStatistics(si)
+		vs, err = sh.specsCtl.ListVersions(p.Id)
+		statCounts, err := sh.specsCtl.VersionStatistics(vs)
 		if err != nil {
 			slog.Error("Failed to fetch versions statistics for project", "id", pid, "error", err)
 		}
-		for idx, s := range si {
-			si[idx].StoryStatusCounts = statCounts[s.Id]
+		for idx, s := range vs {
+			vs[idx].StoryStatusCounts = make(map[dt.RequirementStatus]int)
+			for _, rs := range dt.ALL_RS {
+				vs[idx].StoryStatusCounts[rs] = statCounts[s.Id][rs]
+			}
 		}
 	}
 
@@ -49,7 +78,6 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
 			setViewCookie(vSpecs, w)
-			sh.displaySpecsPage(p, si, w, r)
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -58,7 +86,11 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if strings.HasPrefix(r.URL.Path, "/components/versions") {
 		switch r.Method {
 		case "GET":
-			sh.displayVersionList(si, w, r)
+			if err := sh.specsViewTmpl.ExecuteTemplate(w, "versions-list", vs); err != nil {
+				slog.Error("Cannot render versions-list", "err", err)
+				http.Error(w, "failed to render versions", http.StatusInternalServerError)
+			}
+			return
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -66,12 +98,13 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if strings.HasPrefix(r.URL.Path, "/components/version") {
 		switch r.Method {
 		case "POST":
-			sh.createVersion(*p, r)
+			sh.createVersion(r)
 			http.Redirect(w, r, appendQueryParams("/components/versions", qkCurrProj, pid), http.StatusSeeOther)
 		case http.MethodDelete:
 			sh.deleteVersion(r)
 			// Return empty string for swap
 			io.WriteString(w, "")
+			return
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -81,19 +114,22 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Wrong url", http.StatusBadRequest)
 	}
 
-}
-func (sh SpecsCompHandler) displaySpecsPage(p *dt.Project, si []dt.Version, w http.ResponseWriter, r *http.Request) {
-	specsComponent(p, si).Render(r.Context(), w)
+	data := specsViewData{
+		Project:  p,
+		Versions: vs,
+	}
+
+	if err := sh.specsViewTmpl.Execute(w, data); err != nil {
+		slog.Error("Cannot render specs component", "err", err)
+		http.Error(w, "failed to render specs", http.StatusInternalServerError)
+	}
 }
 
-func (sh SpecsCompHandler) displayVersionList(si []dt.Version, w http.ResponseWriter, r *http.Request) {
-	versionList(si).Render(r.Context(), w)
-}
-
-func (sh SpecsCompHandler) createVersion(project dt.Project, r *http.Request) {
+func (sh SpecsCompHandler) createVersion(r *http.Request) {
 	r.ParseForm()
-	version_name := r.Form.Get("name")
-	s := dt.Version{ProjectId: project.Id}
+	version_name := r.Form.Get("version_name")
+	pid := r.Form.Get("pid")
+	s := dt.Version{ProjectId: pid}
 	s.Name = version_name
 	sh.specsCtl.CreateVersion(s)
 }

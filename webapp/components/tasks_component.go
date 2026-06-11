@@ -1,6 +1,7 @@
 package components
 
 import (
+	"io"
 	"net/http"
 )
 
@@ -14,5 +15,5 @@ type TasksCompHandler struct {
 func (ph TasksCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	setViewCookie(vTasks, w)
-	tasksComponent().Render(r.Context(), w)
+	io.WriteString(w, `<h1 class="title">Tasks</h1>`)
 }

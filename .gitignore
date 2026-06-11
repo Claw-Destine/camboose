@@ -34,3 +34,18 @@ go.work.sum
 data/
 
 __debug_*
+
+
+# --- Node / Webpack ---
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.parcel-cache/
+
+# Frontend build outputs and caches
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/.webpack/
+frontend/coverage/

@@ -2,22 +2,51 @@ package components
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"log/slog"
 	"net/http"
 	"strings"
 
-	dt "claw-destine.com/camboose/core/datatypes"
-
 	pm "claw-destine.com/camboose/core/controllers/projects"
+	dt "claw-destine.com/camboose/core/datatypes"
 )
 
 func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) ProjectsCompHandler {
-	return ProjectsCompHandler{projectManager: pm, recipeManager: rm}
+	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
+
+	tpl := `<camb-projects {{if .Project}}{{$attr := print "data-curr-pid=" .Project.Id}}{{$attr | attr}}{{end}}>
+{{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
+shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
+{{end}}</camb-projects>`
+	t, err := template.New("projects").Funcs(funcMap).Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	bh.projectsTpl = t
+
+	tpl = `<camb-project data-pid={{.Project.Id}} data-name={{.Project.Name}} data-created={{.Project.CreatedAt}} 
+data-updated={{.Project.UpdatedAt}}
+{{if .Project.Recipe}} {{$attr := print "data-curr-recipe=" .Project.Recipe}}{{$attr | attr}}{{end}}
+{{range $idx,$val := .Recipies}}{{$attr := print "data-recipe-" $idx "=" .Id}}{{$attr | attr}}{{end}}>
+{{range $key,$val := .Project.VersionStatusCounts}}<div slot="version-stats" class="level-item has-text-centered">
+<div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
+</camb-project>`
+	t, err = template.New("project").Funcs(funcMap).Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	bh.projectTpl = t
+	return bh
 }
 
 type ProjectsCompHandler struct {
 	projectManager *pm.ProjectControler
 	recipeManager  *pm.RecipeController
+	projectsTpl    *template.Template
+	projectTpl     *template.Template
 }
 
 type projectView int
@@ -27,7 +56,18 @@ const (
 	singleProjectView = iota
 )
 
+type projectsData struct {
+	Projects []dt.Project
+	Project  *dt.Project
+}
+
+type projectData struct {
+	Project  *dt.Project
+	Recipies []dt.Recipe
+}
+
 func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	setViewCookie(vProjects, w)
 	// Order matters
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
@@ -42,7 +82,6 @@ func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			ph.displayProjectView(singleProjectView, w, r)
 		case "DELETE":
 			ph.deleteProject(w, r)
-			ph.displayProjectView(allProjectsView, w, r)
 		default:
 			slog.Error("Unknown method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)
@@ -76,6 +115,8 @@ func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Reque
 		http.Error(w, err.Error(), http.StatusBadRequest)
 
 	}
+	slog.Info("Create project", "id", "pid")
+	http.Redirect(w, r, "/components/body", http.StatusSeeOther)
 }
 
 func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {
@@ -92,15 +133,10 @@ func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Reque
 }
 
 func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
-	projects, err := ph.projectManager.ListProjects(nil)
-	if err != nil {
-		slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	var pid string
 	var p *dt.Project
+	var err error
 
 	switch view {
 	case singleProjectView:
@@ -125,27 +161,48 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 				slog.Error("Failed to stats for project", "id", pid, "error", err)
 			}
 		}
-		p.VersionStatusCounts = stats[pid]
-	}
+		p.VersionStatusCounts = make(map[dt.RequirementStatus]int)
+		for _, rs := range dt.ALL_RS {
 
-	recipies, err := ph.recipeManager.ListRecipes()
-	if err != nil {
-		slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+			p.VersionStatusCounts[rs] = stats[pid][rs]
+		}
 	}
 
 	switch view {
 	case singleProjectView:
-		err = projectComponent(p, recipies).Render(r.Context(), w)
+		recipies, err := ph.recipeManager.ListRecipes()
+		if err != nil {
+			slog.Error("Failed to fetch recipies", "path", r.URL.Path, "reason", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		data := projectData{
+			Project:  p,
+			Recipies: recipies,
+		}
+		if err := ph.projectTpl.Execute(w, data); err != nil {
+			slog.Error("Cannot render body component", "err", err)
+			http.Error(w, "failed to render body", http.StatusInternalServerError)
+		}
 	case allProjectsView:
-		err = projectsComponent(projects, p, recipies).Render(r.Context(), w)
-	}
-	if err != nil {
-		slog.Error("Failed to render component", "path", r.URL.Path, "reason", err)
+		projects, err := ph.projectManager.ListProjects(nil)
+		if err != nil {
+			slog.Error("Failed to fetch projects", "path", r.URL.Path, "reason", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		data := projectsData{
+			Projects: projects,
+			Project:  p,
+		}
+
+		if err := ph.projectsTpl.Execute(w, data); err != nil {
+			slog.Error("Cannot render body component", "err", err)
+			http.Error(w, "failed to render body", http.StatusInternalServerError)
+		}
 	}
 }
 
-func projectLink(p string) string {
-	return "/components/project/" + p
-}
+// func projectLink(p string) string {
+// 	return "/components/project/" + p
+// }

@@ -1,6 +1,8 @@
 package components
 
 import (
+	"html/template"
+	"log"
 	"log/slog"
 	"net/http"
 
@@ -8,12 +10,34 @@ import (
 	dt "claw-destine.com/camboose/core/datatypes"
 )
 
+type bodyData struct {
+	Project  *dt.Project
+	View     string
+	Projects []dt.Project
+}
+
 func NewBodyHandler(pm *pm.ProjectControler) BodyCompHandler {
-	return BodyCompHandler{projectManager: pm}
+	bh := BodyCompHandler{projectManager: pm}
+	tpl := `<camb-body {{if .Project}}project-id="{{.Project.Id}}"{{end}} view="{{.View}}" id="main-body">
+	{{range .Projects}}<a slot="project-dropdown" class="dropdown-item{{if and $.Project (eq $.Project.Id .Id)}} is-active{{end}}"
+		hx-get="/components/body?currentProject={{.Id}}"
+		hx-swap="outerHTML" hx-target="#main-body"> {{.Name}}
+	</a>
+	{{end}}</camb-body>
+	`
+
+	t, err := template.New("main-body").Parse(tpl)
+	if err != nil {
+		slog.Error("Cannot parse template", "err", err)
+		log.Panic("exiting")
+	}
+	bh.templ = t
+	return bh
 }
 
 type BodyCompHandler struct {
 	projectManager *pm.ProjectControler
+	templ          *template.Template
 }
 
 func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -31,18 +55,23 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if currentProjectId != "" {
 		cp, err := ph.projectManager.GetProjectById(r.Context(), currentProjectId)
+		var projectCookie http.Cookie
 		if err != nil {
-			slog.Error("Failed to load current project", "id", currentProjectId)
+			slog.Info("Failed to load current project", "id", currentProjectId)
+			projectCookie = http.Cookie{
+				Name:   "project",
+				MaxAge: -1,
+			}
 		} else {
 			currentProject = cp
-			projectCookie := http.Cookie{
+			projectCookie = http.Cookie{
 				Name:     "project",
 				Value:    currentProjectId,
 				SameSite: http.SameSiteLaxMode,
 			}
 
-			http.SetCookie(w, &projectCookie)
 		}
+		http.SetCookie(w, &projectCookie)
 	}
 	var currentView string
 	viewCookie, err := r.Cookie("view")
@@ -66,5 +95,14 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot load last projects")
 	}
 
-	bodyComponent(currentProject, lastProjects, currentView).Render(r.Context(), w)
+	data := bodyData{
+		Project:  currentProject,
+		View:     currentView,
+		Projects: lastProjects,
+	}
+
+	if err := ph.templ.Execute(w, data); err != nil {
+		slog.Error("Cannot render body component", "err", err)
+		http.Error(w, "failed to render body", http.StatusInternalServerError)
+	}
 }

@@ -9,8 +9,8 @@ Recipe driven software development AI workflow orchestrator
 ```sh
 |- recipies # Example recipies
 |- core # GoLang - application logic
-|- webapp # Templ + HTMX frontend
-|- static # Shared resources
+|- webapp # HTMX fragment renderer
+|- frontend # Webpack project wih web components
 ```
 
 ## 3rd Pary software

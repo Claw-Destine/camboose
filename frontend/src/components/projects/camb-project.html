@@ -1,0 +1,26 @@
+<div id="root" class="block">
+    <h1 id="title" class="title"></h1>
+    <h2 class="subtitle">Id: <span id="pid"></span></h2>
+    <p>Created At: <span id="created"></span></p>
+    <p>Last Update: <span id="updated"></span></p>
+    <h2 class="is-size-3">Versions:</h2>
+    <nav class="level">
+        <slot name="version-stats">
+    </nav>
+    <form id="edit-project" hx-target="#project-details" hx-on::before-request="hideElement('newproject')">
+        <label class="label">Recipe</label>
+        <div class="select is-primary">
+            <select name="recipe">
+            </select>
+        </div>
+        <div class="field is-grouped"><input type="submit" class="button is-link" value="Update"></div>
+
+    </form>
+</div>
+<div class="block">
+    <nav>
+        <button id="set-active" class="button is-link" hx-swap="outerHTML" hx-target="global #main-body">Set as
+            active</button>
+        <button id="btn-delete" class="button is-link" hx-target="global #main-body">Delete</button>
+    </nav>
+</div>

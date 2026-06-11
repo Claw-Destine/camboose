@@ -1,0 +1,30 @@
+<div name="vi-root" class="box container is-fluid">
+    <button name="vi-delete" class="delete is-pulled-right" hx-target="closest div"
+        hx-confirm="This will permanently delete the version. Are you sure?" hx-swap="outerHTML"></button>
+    <div class="level">
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Name</p>
+                <p><b name="vi-name">N/A</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Description</p>
+                <p><b name="vi-desc">N/A</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <p class="heading">Status</p>
+                <p><b name="vi-status">N/A</b></p>
+            </div>
+        </div>
+        <div class="level-item has-text-centered">
+            <div>
+                <button name="vi-edit" class="button">Edit</button>
+            </div>
+        </div>
+        <slot name="vi-story-status">
+    </div>
+</div>
