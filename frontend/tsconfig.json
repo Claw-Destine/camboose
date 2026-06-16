@@ -11,7 +11,13 @@
         "strict": false,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "plugins": [
+            {
+                "name": "ts-lit-plugin",
+                "strict": true
+            }
+        ],
     },
     "include": [
         "src/**/*",
