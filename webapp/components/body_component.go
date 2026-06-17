@@ -18,7 +18,7 @@ type bodyData struct {
 
 func NewBodyHandler(pm *pm.ProjectControler) BodyCompHandler {
 	bh := BodyCompHandler{projectManager: pm}
-	tpl := `<camb-body {{if .Project}}pid="{{.Project.Id}}"{{end}} view="{{.View}}" id="main-body">
+	tpl := `<camb-body {{if .Project}}data-pid="{{.Project.Id}}"{{end}} data-view="{{.View}}" id="main-body">
 	{{range .Projects}}<a slot="project-dropdown" class="dropdown-item{{if and $.Project (eq $.Project.Id .Id)}} is-active{{end}}"
 		hx-get="/components/body?currentProject={{.Id}}"
 		hx-swap="outerHTML" hx-target="#main-body"> {{.Name}}

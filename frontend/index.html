@@ -1,19 +1,22 @@
 <!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Camboose</title>
+    </head>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Camboose</title>
-</head>
-
-<body>
-    <div id="notification-bar" class="notification is-info is-hidden">
-        <button class="delete" onclick="hideNotification('notification-bar')"></button>
-        <div id="notification-msg">Error</div>
-    </div>
-    <div class="columns" id="main-body" hx-get="/components/body" hx-trigger="load" hx-swap="outerHTML">
-    </div>
-</body>
-
+    <body>
+        <div id="notification-bar" class="notification is-info is-hidden">
+            <button class="delete" onclick="hideNotification('notification-bar')"></button>
+            <div id="notification-msg">Error</div>
+        </div>
+        <div
+            class="columns"
+            id="main-body"
+            hx-get="/components/body"
+            hx-trigger="load"
+            hx-swap="outerHTML"
+        ></div>
+    </body>
 </html>

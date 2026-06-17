@@ -1,0 +1,5 @@
+data/
+documentstore/
+frontend/dist/
+frontend/node_modules/
+webapp/__debug_bin*
