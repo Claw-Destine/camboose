@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"log/slog"
@@ -28,10 +27,10 @@ hx-get="/components/project/{{ .Id }}" hx-target="#project-details">{{.Name}}</a
 
 	tpl = `<camb-project data-pid={{.Project.Id}} data-name={{.Project.Name}} data-created={{.Project.CreatedAt}} 
 data-updated={{.Project.UpdatedAt}}
-{{if .Project.Recipe}} {{$attr := print "data-curr-recipe=" .Project.Recipe}}{{$attr | attr}}{{end}}
-{{range $idx,$val := .Recipies}}{{$attr := print "data-recipe-" $idx "=" .Id}}{{$attr | attr}}{{end}}>
+{{if .Project.Recipe}} {{$attr := print "data-curr-recipe=" .Project.Recipe}}{{$attr | attr}}{{end}}>
 {{range $key,$val := .Project.VersionStatusCounts}}<div slot="version-stats" class="level-item has-text-centered">
 <div><p class="heading">{{$key}}</p><p class="title">{{$val}}</p></div></div>{{end}}
+{{range .Recipies}}<option slot="recipies">{{.Id}}</option>{{end}}
 </camb-project>`
 	t, err = template.New("project").Funcs(funcMap).Parse(tpl)
 	if err != nil {
@@ -116,7 +115,8 @@ func (ph ProjectsCompHandler) deleteProject(w http.ResponseWriter, r *http.Reque
 
 	}
 	slog.Info("Create project", "id", "pid")
-	http.Redirect(w, r, "/components/body", http.StatusSeeOther)
+	// http.Redirect(w, r, "/components/body", http.StatusSeeOther)
+	redirectWithHX(w, r, "/")
 }
 
 func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +129,8 @@ func (ph ProjectsCompHandler) createProject(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	slog.Info("Create project", "name", pname, "id", np.Id)
-	http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
+	// http.Redirect(w, r, fmt.Sprintf("/components/body?currentProject=%s", np.Id), http.StatusSeeOther)
+	redirectWithHX(w, r, "/")
 }
 
 func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.ResponseWriter, r *http.Request) {
@@ -150,17 +151,19 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 
 	if pid != "" {
 		p, err = ph.projectManager.GetProjectById(r.Context(), pid)
-		if err != nil {
+		if err != nil && view == singleProjectView {
 			slog.Error("Failed to fetch project", "id", pid, "error", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+	}
+
+	if p != nil {
 		stats, err := ph.projectManager.ProjectStatistics([]string{pid})
 		if err != nil {
-			if err != nil {
-				slog.Error("Failed to stats for project", "id", pid, "error", err)
-			}
+			slog.Error("Failed to stats for project", "id", pid, "error", err)
 		}
+
 		p.VersionStatusCounts = make(map[dt.RequirementStatus]int)
 		for _, rs := range dt.ALL_RS {
 

@@ -12,7 +12,7 @@ export function toggleClass(root: ParentNode, elementId: string, cls = "is-activ
 export function insertCustomElement(innerHTML: string, root: Element) {
     root.innerHTML += innerHTML;
 }
-export function removeElement(query: string, root: Element) {
+export function removeElement(query: string, root: ParentNode) {
     const el = root.querySelector(query) as Element;
     el.remove();
 }

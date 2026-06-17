@@ -37,7 +37,7 @@ class VersionItem extends ElementBase {
     @property({ attribute: "data-status" })
     accessor versionStatus: string = "N/A";
 
-    protected firstUpdated(_changedProperties: PropertyValues): void {
+    protected updated(_changedProperties: PropertyValues): void {
         this.processFakeSlots(["vi-story-status"]);
     }
     protected createRenderRoot(): HTMLElement | DocumentFragment {

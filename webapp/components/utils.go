@@ -45,6 +45,16 @@ func setViewCookie(view CambView, w http.ResponseWriter) {
 	http.SetCookie(w, &viewCookie)
 }
 
+func redirectWithHX(w http.ResponseWriter, r *http.Request, target string) {
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", target)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	http.Redirect(w, r, target, http.StatusSeeOther)
+}
+
 var funcMap = template.FuncMap{
 	"attr": func(s string) template.HTMLAttr {
 		return template.HTMLAttr(s)

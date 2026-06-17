@@ -7,7 +7,7 @@ import htmx from "htmx.org";
 @customElement("camb-projects")
 class ProjectsComponent extends ElementBase {
     @property({ attribute: "data-curr-pid" })
-    accessor currentPid: string = "N/A";
+    accessor currentPid: string = undefined;
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;
     }
@@ -17,7 +17,7 @@ class ProjectsComponent extends ElementBase {
             document.body,
         );
     }
-    protected firstUpdated(_changedProperties: PropertyValues): void {
+    protected updated(_changedProperties: PropertyValues): void {
         this.processFakeSlots(["projects-list"])
         htmx.process(this.renderRoot)
     }
@@ -53,9 +53,16 @@ class ProjectsComponent extends ElementBase {
                     <slot id="projects-list" name="projects-list"></slot>
                 </nav>
             </div>
-            <div id="project-details" class="column" hx-get=${"/components/project/" + this.currentPid} hx-trigger="load"
-            @htmx:responseError=${showNotification}>Select or create a new project</div>
+            ${this.projectDiv()}
         </div> `;
+    }
+    private projectDiv() {
+        if (this.currentPid) {
+            return html`<div id="project-details" class="column" hx-get=${"/components/project/" + this.currentPid} hx-trigger="load"
+            @htmx:responseError=${showNotification}>Select or create a new project</div>`
+        } else {
+            return html`<div id="project-details" class="column">Select or create a new project</div>`
+        }
     }
 }
 
@@ -71,8 +78,8 @@ class ProjectComponent extends ElementBase {
     accessor projectCreated: string = "N/A";
     @property({ attribute: "data-updated" })
     accessor projectUpdated: string = "N/A";
-    protected firstUpdated(_changedProperties: PropertyValues): void {
-        this.processFakeSlots(["version-stats"]);
+    protected updated(_changedProperties: PropertyValues): void {
+        this.processFakeSlots(["version-stats", "recipies"]);
     }
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;
@@ -95,7 +102,9 @@ class ProjectComponent extends ElementBase {
                 >
                     <label class="label">Recipe</label>
                     <div class="select is-primary">
-                        <select name="recipe"></select>
+                        <select name="recipe">
+                            <slot name="recipies"></slot>
+                        </select>
                     </div>
                     <div class="field is-grouped">
                         <input type="submit" class="button is-link" value="Update" />
@@ -108,11 +117,13 @@ class ProjectComponent extends ElementBase {
                         id="set-active"
                         class="button is-link"
                         hx-swap="outerHTML"
-                        hx-target="global #main-body"
+                        hx-target="#main-body"
+                        hx-get=${"/components/body?currentProject=" + this.projectId}
                     >
                         Set as active
                     </button>
-                    <button id="btn-delete" class="button is-link" hx-target="global #main-body">
+                    <button id="btn-delete" class="button is-link" hx-target="global #main-body"
+                    hx-delete="${"/components/project/" + this.projectId}">
                         Delete
                     </button>
                 </nav>
@@ -121,17 +132,18 @@ class ProjectComponent extends ElementBase {
 }
 
 @customElement("new-project-modal")
-class NewProjectModal extends LitElement {
+class NewProjectModal extends ElementBase {
     protected firstUpdated(_changedProperties: PropertyValues): void {
         htmx.process(this.renderRoot)
     }
-    protected createRenderRoot(): HTMLElement | DocumentFragment {
-        return this;
-    }
+    // protected createRenderRoot(): HTMLElement | DocumentFragment {
+    //     return this;
+    // }
     protected closeMe(_: Event) {
-        removeElement("new-project-modal", document.body);
+        removeElement("#new-project-modal", this.renderRoot);
     }
     protected render(): TemplateResult {
+        this.copyGlobalStyles()
         return html`<div id="newproject" class="modal is-active">
             <div class="modal-background" @click=${this.closeMe}></div>
             <div class="modal-content">
@@ -139,9 +151,9 @@ class NewProjectModal extends LitElement {
                     <h3 class="is-size-4">Create new project</h3>
                     <form
                         id="new-project-submit"
-                        hx-post="/components/project"
+                        hx-post="/components/project/"
                         hx-swap="outerHTML"
-                        hx-target="#main-body"
+                        hx-target="global #main-body"
                         @htmx:afterRequest=${this.closeMe}
                         @htmx:responseError=${showNotification}>
                         <div class="field">

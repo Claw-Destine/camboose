@@ -1,4 +1,4 @@
-import { LitElement, html, nothing } from "lit";
+import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import "bulma/css/bulma.min.css";
 import logo from "../../assets/camboose_logo.png";
@@ -8,7 +8,7 @@ import { ifDefined } from "lit/directives/if-defined.js";
 import { ElementBase } from "../elementBase";
 
 @customElement("camb-body")
-class MyElement extends ElementBase {
+class MainBody extends ElementBase {
     @property({ attribute: "data-pid" })
     accessor pid: string;
     @property({ attribute: "data-view" })
