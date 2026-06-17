@@ -1,7 +1,7 @@
 import { LitElement, PropertyValues, TemplateResult, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { ElementBase } from "../elementBase";
-import { insertCustomElement, removeElement } from "../../utils";
+import { insertCustomElement, removeElement, showNotification } from "../../utils";
 import htmx from "htmx.org";
 
 @customElement("camb-projects")
@@ -53,7 +53,8 @@ class ProjectsComponent extends ElementBase {
                     <slot id="projects-list" name="projects-list"></slot>
                 </nav>
             </div>
-            <div id="project-details" class="column" hx-get=${"/components/project/" + this.currentPid} hx-trigger="load">Select or create a new project</div>
+            <div id="project-details" class="column" hx-get=${"/components/project/" + this.currentPid} hx-trigger="load"
+            @htmx:responseError=${showNotification}>Select or create a new project</div>
         </div> `;
     }
 }
@@ -132,7 +133,7 @@ class NewProjectModal extends LitElement {
     }
     protected render(): TemplateResult {
         return html`<div id="newproject" class="modal is-active">
-            <div class="modal-background"></div>
+            <div class="modal-background" @click=${this.closeMe}></div>
             <div class="modal-content">
                 <div class="box">
                     <h3 class="is-size-4">Create new project</h3>
@@ -141,7 +142,8 @@ class NewProjectModal extends LitElement {
                         hx-post="/components/project"
                         hx-swap="outerHTML"
                         hx-target="#main-body"
-                        @htmx:afterRequest=${this.closeMe}>
+                        @htmx:afterRequest=${this.closeMe}
+                        @htmx:responseError=${showNotification}>
                         <div class="field">
                             <label class="label">Project Name</label>
                             <input
@@ -161,6 +163,7 @@ class NewProjectModal extends LitElement {
                 id="close-new-project-btn"
                 class="modal-close is-large"
                 aria-label="close"
+                @click=${this.closeMe}
             ></button>
         </div> `;
     }

@@ -2,7 +2,7 @@ import { LitElement, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import "bulma/css/bulma.min.css";
 import logo from "../../assets/camboose_logo.png";
-import { getCookie, toggleClass } from "../../utils";
+import { getCookie, showNotification, toggleClass } from "../../utils";
 import htmx from "htmx.org";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { ElementBase } from "../elementBase";
@@ -113,6 +113,7 @@ class MyElement extends ElementBase {
                                 @click=${this.setActiveMenu}
                                 class="${ifDefined(view === "specs" ? "is-active" : "")}"
                                 hx-get=${specsPath}
+                                @htmx:responseError=${showNotification}
                                 >Specs</a
                             >
                         </li>
@@ -125,6 +126,7 @@ class MyElement extends ElementBase {
                                 @click=${this.setActiveMenu}
                                 class="${ifDefined(view === "tasks" ? "is-active" : "")}"
                                 hx-get=${tasksPath}
+                                @htmx:responseError=${showNotification}
                                 >Tasks</a
                             >
                         </li>
@@ -137,6 +139,7 @@ class MyElement extends ElementBase {
                                 @click=${this.setActiveMenu}
                                 class="${ifDefined(view === "projects" ? "is-active" : "")}"
                                 hx-get=${projectsPath}
+                                @htmx:responseError=${showNotification}
                                 >Projects</a
                             >
                         </li>
@@ -148,6 +151,7 @@ class MyElement extends ElementBase {
                                 @click=${this.setActiveMenu}
                                 class="${ifDefined(view === "recipies" ? "is-active" : "")}"
                                 hx-get=${recipiesPath}
+                                @htmx:responseError=${showNotification}
                                 >Recipies</a
                             >
                         </li>
@@ -158,6 +162,7 @@ class MyElement extends ElementBase {
                     class="column"
                     hx-trigger="load"
                     hx-get=${currViewPath}
+                    @htmx:responseError=${showNotification}
                 ></div>
             </div>
         `;

@@ -22,3 +22,18 @@ export function getCookie(name: string): string | null {
     if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
     return null;
 }
+export function showNotification(event: CustomEvent) {
+    const nbar = document.body.querySelector("#notification-bar")
+    const msg = nbar.querySelector("#notification-msg")
+
+    const status = event.detail.xhr.status
+    const text = event.detail.xhr.responseText
+
+    msg.textContent = "Request returned status: " + status + " . Reason: " + text;
+    nbar.classList.remove("is-hidden")
+}
+export function hideNotification() {
+    const nbar = document.body.querySelector("#notification-bar")
+
+    nbar.classList.add("is-hidden")
+}
