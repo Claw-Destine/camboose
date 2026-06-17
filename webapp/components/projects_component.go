@@ -16,8 +16,8 @@ func NewProjectsHandler(pm *pm.ProjectControler, rm *pm.RecipeController) Projec
 	var bh = ProjectsCompHandler{projectManager: pm, recipeManager: rm}
 
 	tpl := `<camb-projects {{if .Project}}{{$attr := print "data-curr-pid=" .Project.Id}}{{$attr | attr}}{{end}}>
-{{range .Projects}}<a slot="projects-list" class="panel-block" href="#" 
-shadow-href-url="/components/project/{{ .Id }}" shadow-href-target="#project-details">{{.Name}}</a>
+{{range .Projects}}<a slot="projects-list" class="panel-block" 
+hx-get="/components/project/{{ .Id }}" hx-target="#project-details">{{.Name}}</a>
 {{end}}</camb-projects>`
 	t, err := template.New("projects").Funcs(funcMap).Parse(tpl)
 	if err != nil {

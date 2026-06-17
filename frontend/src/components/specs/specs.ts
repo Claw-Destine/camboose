@@ -1,6 +1,7 @@
 import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { ElementBase } from "../elementBase";
+import htmx from "htmx.org";
 
 @customElement("camb-specs")
 class SpecsComponent extends ElementBase {
@@ -83,6 +84,9 @@ class VersionItem extends ElementBase {
 
 @customElement("edit-version-modal")
 class EditVersionModal extends LitElement {
+    protected firstUpdated(_changedProperties: PropertyValues): void {
+        htmx.process(this.renderRoot)
+    }
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;
     }
