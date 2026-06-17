@@ -2,22 +2,38 @@ import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { ElementBase } from "../elementBase";
 import htmx from "htmx.org";
+import { showNotification } from "../../utils";
 
 @customElement("camb-specs")
 class SpecsComponent extends ElementBase {
+    @property({ attribute: "data-pid" })
+    accessor pid: string;
+    protected updated(_changedProperties: PropertyValues): void {
+        this.processFakeSlots(["version-list"])
+        htmx.process(this.renderRoot);
+    }
+    protected createRenderRoot(): HTMLElement | DocumentFragment {
+        return this;
+    }
     protected render() {
         this.copyGlobalStyles();
         return html`<div class="box">
-                <form id="new-version-form">
+                <form
+                    id="new-version-form"
+                    hx-post=${"/components/version?currentProject=" + this.pid}
+                    hx-target="#versionlist-container"
+                    @htmx:responseError=${showNotification}
+                >
                     <div class="container is-fluid">
                         <b>Create a new version / epic:</b>
-                        <label class="cbs_hform_item" for="version_name">Name</label>
+                        <label class="cbs_hform_item" for="version_name">Name: </label>
                         <input
                             class="cbs_hform_item"
                             type="text"
                             id="version_name"
                             name="version_name"
                         />
+                        <input hidden type="text" name="pid" value=${this.pid} />
                         <input class="cbs_hform_item" type="submit" value="create" />
                     </div>
                 </form>
@@ -85,7 +101,7 @@ class VersionItem extends ElementBase {
 @customElement("edit-version-modal")
 class EditVersionModal extends LitElement {
     protected firstUpdated(_changedProperties: PropertyValues): void {
-        htmx.process(this.renderRoot)
+        htmx.process(this.renderRoot);
     }
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;

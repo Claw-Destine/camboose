@@ -23,17 +23,17 @@ export function getCookie(name: string): string | null {
     return null;
 }
 export function showNotification(event: CustomEvent) {
-    const nbar = document.body.querySelector("#notification-bar")
-    const msg = nbar.querySelector("#notification-msg")
+    const nbar = document.body.querySelector("#notification-bar");
+    const msg = nbar.querySelector("#notification-msg");
 
-    const status = event.detail.xhr.status
-    const text = event.detail.xhr.responseText
+    const status = event.detail.xhr.status;
+    const text = event.detail.xhr.responseText;
 
     msg.textContent = "Request returned status: " + status + " . Reason: " + text;
-    nbar.classList.remove("is-hidden")
+    nbar.classList.remove("is-hidden");
 }
 export function hideNotification() {
-    const nbar = document.body.querySelector("#notification-bar")
+    const nbar = document.body.querySelector("#notification-bar");
 
-    nbar.classList.add("is-hidden")
+    nbar.classList.add("is-hidden");
 }

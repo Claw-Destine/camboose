@@ -18,8 +18,8 @@ class ProjectsComponent extends ElementBase {
         );
     }
     protected updated(_changedProperties: PropertyValues): void {
-        this.processFakeSlots(["projects-list"])
-        htmx.process(this.renderRoot)
+        this.processFakeSlots(["projects-list"]);
+        htmx.process(this.renderRoot);
     }
     protected render(): TemplateResult<1> {
         return html`<div class="columns">
@@ -27,8 +27,11 @@ class ProjectsComponent extends ElementBase {
                 <nav class="panel">
                     <p class="panel-heading">Projects</p>
                     <div class="panel-block">
-                        <button id="new-project" class="button is-link is-outlined is-fullwidth"
-                        @click=${this.openNewProjectModal}>
+                        <button
+                            id="new-project"
+                            class="button is-link is-outlined is-fullwidth"
+                            @click=${this.openNewProjectModal}
+                        >
                             New Project
                         </button>
                     </div>
@@ -58,10 +61,19 @@ class ProjectsComponent extends ElementBase {
     }
     private projectDiv() {
         if (this.currentPid) {
-            return html`<div id="project-details" class="column" hx-get=${"/components/project/" + this.currentPid} hx-trigger="load"
-            @htmx:responseError=${showNotification}>Select or create a new project</div>`
+            return html`<div
+                id="project-details"
+                class="column"
+                hx-get=${"/components/project/" + this.currentPid}
+                hx-trigger="load"
+                @htmx:responseError=${showNotification}
+            >
+                Select or create a new project
+            </div>`;
         } else {
-            return html`<div id="project-details" class="column">Select or create a new project</div>`
+            return html`<div id="project-details" class="column">
+                Select or create a new project
+            </div>`;
         }
     }
 }
@@ -122,8 +134,12 @@ class ProjectComponent extends ElementBase {
                     >
                         Set as active
                     </button>
-                    <button id="btn-delete" class="button is-link" hx-target="global #main-body"
-                    hx-delete="${"/components/project/" + this.projectId}">
+                    <button
+                        id="btn-delete"
+                        class="button is-link"
+                        hx-target="global #main-body"
+                        hx-delete="${"/components/project/" + this.projectId}"
+                    >
                         Delete
                     </button>
                 </nav>
@@ -134,7 +150,7 @@ class ProjectComponent extends ElementBase {
 @customElement("new-project-modal")
 class NewProjectModal extends ElementBase {
     protected firstUpdated(_changedProperties: PropertyValues): void {
-        htmx.process(this.renderRoot)
+        htmx.process(this.renderRoot);
     }
     // protected createRenderRoot(): HTMLElement | DocumentFragment {
     //     return this;
@@ -143,7 +159,7 @@ class NewProjectModal extends ElementBase {
         removeElement("#new-project-modal", this.renderRoot);
     }
     protected render(): TemplateResult {
-        this.copyGlobalStyles()
+        this.copyGlobalStyles();
         return html`<div id="newproject" class="modal is-active">
             <div class="modal-background" @click=${this.closeMe}></div>
             <div class="modal-content">
@@ -155,7 +171,8 @@ class NewProjectModal extends ElementBase {
                         hx-swap="outerHTML"
                         hx-target="global #main-body"
                         @htmx:afterRequest=${this.closeMe}
-                        @htmx:responseError=${showNotification}>
+                        @htmx:responseError=${showNotification}
+                    >
                         <div class="field">
                             <label class="label">Project Name</label>
                             <input

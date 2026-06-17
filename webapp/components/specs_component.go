@@ -14,7 +14,7 @@ import (
 )
 
 func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCompHandler {
-	tpl := `<camb-specs data-project={{.Project.Id}}>
+	tpl := `<camb-specs data-pid={{.Project.Id}}>
 {{template "versions-list" .Versions}}
 </camb-specs>
 
