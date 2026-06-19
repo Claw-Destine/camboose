@@ -78,7 +78,7 @@ func (sh SpecsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/components/specs") {
 		switch r.Method {
 		case "GET":
-			setViewCookie(vSpecs, w)
+			setViewCookie(cvSpecs, w)
 		default:
 			slog.Error("Unsupported method", "method", r.Method)
 			http.Error(w, "Wrong url", http.StatusMethodNotAllowed)

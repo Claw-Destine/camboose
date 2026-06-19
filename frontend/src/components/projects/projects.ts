@@ -129,7 +129,7 @@ class ProjectComponent extends ElementBase {
                         id="set-active"
                         class="button is-link"
                         hx-swap="outerHTML"
-                        hx-target="#main-body"
+                        hx-target="global #main-body"
                         hx-get=${"/components/body?currentProject=" + this.projectId}
                     >
                         Set as active
@@ -156,7 +156,7 @@ class NewProjectModal extends ElementBase {
     //     return this;
     // }
     protected closeMe(_: Event) {
-        removeElement("#new-project-modal", this.renderRoot);
+        removeElement("#new-project-modal", document.body);
     }
     protected render(): TemplateResult {
         this.copyGlobalStyles();

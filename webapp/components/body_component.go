@@ -61,6 +61,7 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			projectCookie = http.Cookie{
 				Name:   "project",
 				MaxAge: -1,
+				Path:   "/",
 			}
 		} else {
 			currentProject = cp
@@ -68,6 +69,7 @@ func (ph BodyCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				Name:     "project",
 				Value:    currentProjectId,
 				SameSite: http.SameSiteLaxMode,
+				Path:     "/",
 			}
 
 		}

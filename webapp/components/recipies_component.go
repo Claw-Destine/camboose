@@ -33,7 +33,7 @@ type RecipiesCompHandler struct {
 }
 
 func (ph RecipiesCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	setViewCookie(vRecipies, w)
+	setViewCookie(cvRecipies, w)
 	ph.displayRecipiesView(w, r)
 }
 

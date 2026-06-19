@@ -30,16 +30,17 @@ func appendQueryParams(basePath string, params ...string) string {
 // views
 type CambView string
 
-const vSpecs = "specs"
-const vTasks = "tasks"
-const vProjects = "projects"
-const vRecipies = "recipies"
+const cvSpecs CambView = "specs"
+const cvTasks CambView = "tasks"
+const cvProjects CambView = "projects"
+const cvRecipies CambView = "recipies"
 
 func setViewCookie(view CambView, w http.ResponseWriter) {
 	viewCookie := http.Cookie{
 		Name:     "view",
 		Value:    string(view),
 		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, &viewCookie)

@@ -66,7 +66,6 @@ type projectData struct {
 }
 
 func (ph ProjectsCompHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	setViewCookie(vProjects, w)
 	// Order matters
 	if strings.HasPrefix(r.URL.Path, "/components/projects") {
 		ph.displayProjectView(allProjectsView, w, r)
@@ -145,7 +144,7 @@ func (ph ProjectsCompHandler) displayProjectView(view projectView, w http.Respon
 		pid = urlPart[len(urlPart)-1]
 
 	case allProjectsView:
-		setViewCookie(vProjects, w)
+		setViewCookie(cvProjects, w)
 		pid = r.URL.Query().Get("currentProject")
 	}
 
