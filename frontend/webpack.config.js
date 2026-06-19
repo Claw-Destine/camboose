@@ -22,7 +22,7 @@ const config = {
     plugins: [
         new HtmlWebpackPlugin({
             template: "index.html",
-            favicon: './src/assets/camboose_favicon.png'
+            favicon: "./src/assets/camboose_favicon.png",
         }),
         // Add your plugins here
         // Learn more about plugins from https://webpack.js.org/configuration/plugins/
@@ -32,7 +32,7 @@ const config = {
             {
                 test: /\.tsx?$/,
                 use: "ts-loader",
-                exclude: /node_modules/
+                exclude: /node_modules/,
             },
             {
                 test: /\.css$/i,
@@ -49,12 +49,14 @@ const config = {
 
             {
                 test: /\.html$/i,
-                use: [{
-                    loader: "html-loader",
-                    options: {
-                        minimize: false,
+                use: [
+                    {
+                        loader: "html-loader",
+                        options: {
+                            minimize: false,
+                        },
                     },
-                }],
+                ],
             },
 
             // Add your rules for custom modules here

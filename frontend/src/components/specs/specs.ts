@@ -1,86 +1,124 @@
+import { LitElement, PropertyValues, html, nothing } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { ElementBase } from "../elementBase";
 import htmx from "htmx.org";
-import { FieldMapping, registerElementWithTemplate, ShadowTemplElement, TemplElement } from "../../elementBase";
-import specsTemplate from "./camb-specs.html"
-import versionItemTemplate from "./version-item.html"
-import editVersionModalTemplate from "./edit-version-modal.html"
-import { insertCustomElement, removeElement } from "../../utils";
+import { showNotification } from "../../utils";
 
-
-
-export class SpecsComponent extends ShadowTemplElement {
-    constructor() {
-        super("camb-specs", true);
-        this.setupActions()
+@customElement("camb-specs")
+class SpecsComponent extends ElementBase {
+    @property({ attribute: "data-pid" })
+    accessor pid: string;
+    protected updated(_changedProperties: PropertyValues): void {
+        this.processFakeSlots(["version-list"])
+        htmx.process(this.renderRoot);
     }
-
-    setupActions() {
-        const pid = this.getAttribute("data-project")
-        const form = this.shadowRoot.querySelector('form[id="new-version-form"]')
-        const targetElement = this.shadowRoot.querySelector('div[id="versionlist-container"]')
-
-        function createVersion(event: SubmitEvent) {
-            event.preventDefault();
-
-            const data = new FormData(event.target as HTMLFormElement);
-            const values: Record<string, FormDataEntryValue> = {};
-            for (const [key, value] of data.entries()) {
-                values[key] = value;
-            }
-            values["pid"] = pid
-            htmx.ajax("POST", "/components/version/?currentProject=" + pid,
-                {
-                    "target": targetElement,
-                    "values": values
-                }
-            )
-        }
-        form.addEventListener("submit", createVersion)
+    protected createRenderRoot(): HTMLElement | DocumentFragment {
+        return this;
     }
-}
-
-export function registerSpecsComponent() {
-    registerElementWithTemplate("camb-specs", SpecsComponent, specsTemplate);
-}
-const versionMapping: FieldMapping[] = [{
-    source: "data-name",
-    targetSelector: 'b[name="vi-name"]'
-}, {
-    source: "data-desc",
-    targetSelector: 'b[name="vi-desc"]'
-}, {
-    source: "data-status",
-    targetSelector: 'b[name="vi-status"]'
-}
-]
-export class VersionItem extends TemplElement {
-    constructor() {
-        super("version-item", versionMapping, ["vi-story-status"])
-        const vid = this.getAttribute("data-id")
-        const delBtn = this.querySelector('button[name="vi-delete"]')
-        delBtn.setAttribute("hx-delete", "/components/version/" + vid)
-        const npb = this.querySelector('button[name="vi-edit-btn"]') as HTMLButtonElement | null;
-        npb.addEventListener('click', _ => {
-            console.log("edit version");
-            insertCustomElement('<edit-version-modal id="edit-version-modal"></edit-version-modal>',
-                document.body);
-        })
+    protected render() {
+        this.copyGlobalStyles();
+        return html`<div class="box">
+                <form
+                    id="new-version-form"
+                    hx-post=${"/components/version?currentProject=" + this.pid}
+                    hx-target="#versionlist-container"
+                    @htmx:responseError=${showNotification}
+                >
+                    <div class="container is-fluid">
+                        <b>Create a new version / epic:</b>
+                        <label class="cbs_hform_item" for="version_name">Name: </label>
+                        <input
+                            class="cbs_hform_item"
+                            type="text"
+                            id="version_name"
+                            name="version_name"
+                        />
+                        <input hidden type="text" name="pid" value=${this.pid} />
+                        <input class="cbs_hform_item" type="submit" value="create" />
+                    </div>
+                </form>
+            </div>
+            <div class="box cbs_vfull" id="versionlist-container">
+                <slot name="version-list"></slot>
+            </div>`;
     }
 }
 
-export function registerVersionItem() {
-    registerElementWithTemplate("version-item", VersionItem, versionItemTemplate)
-}
-const EDIT_VERSION_MODAL = "edit-version-modal"
-export class EditVersionModal extends TemplElement {
-    constructor() {
-        super(EDIT_VERSION_MODAL)
+@customElement("version-item")
+class VersionItem extends ElementBase {
+    @property({ attribute: "data-name" })
+    accessor versionName: string = "N/A";
+    @property({ attribute: "data-desc" })
+    accessor versionDesc: string = "N/A";
+    @property({ attribute: "data-status" })
+    accessor versionStatus: string = "N/A";
 
-        const closeBtn = this.querySelectorAll('[function="close-edit-version"]');
-        closeBtn.forEach(item => item.addEventListener("click", _ => { removeElement(EDIT_VERSION_MODAL, document.body) }))
-        htmx.process(this)
+    protected updated(_changedProperties: PropertyValues): void {
+        this.processFakeSlots(["vi-story-status"]);
+    }
+    protected createRenderRoot(): HTMLElement | DocumentFragment {
+        return this;
+    }
+    protected render() {
+        return html`<div name="vi-root" class="box container is-fluid">
+            <button
+                name="vi-delete"
+                class="delete is-pulled-right"
+                hx-target="closest div"
+                hx-confirm="This will permanently delete the version. Are you sure?"
+                hx-swap="outerHTML"
+            ></button>
+            <div class="level">
+                <div class="level-item has-text-centered">
+                    <div>
+                        <p class="heading">Name</p>
+                        <p><b name="vi-name">${this.versionName}</b></p>
+                    </div>
+                </div>
+                <div class="level-item has-text-centered">
+                    <div>
+                        <p class="heading">Description</p>
+                        <p><b name="vi-desc">${this.versionDesc}</b></p>
+                    </div>
+                </div>
+                <div class="level-item has-text-centered">
+                    <div>
+                        <p class="heading">Status</p>
+                        <p><b name="vi-status">${this.versionStatus}</b></p>
+                    </div>
+                </div>
+                <div class="level-item has-text-centered">
+                    <div>
+                        <button name="vi-edit" class="button">Edit</button>
+                    </div>
+                </div>
+                <slot name="vi-story-status"></slot>
+            </div>
+        </div>`;
     }
 }
 
-export function registerEditVersionModal() {
-    registerElementWithTemplate(EDIT_VERSION_MODAL, EditVersionModal, editVersionModalTemplate)
+@customElement("edit-version-modal")
+class EditVersionModal extends LitElement {
+    protected firstUpdated(_changedProperties: PropertyValues): void {
+        htmx.process(this.renderRoot);
+    }
+    protected createRenderRoot(): HTMLElement | DocumentFragment {
+        return this;
+    }
+    protected render() {
+        return html`<div id="editversion" class="modal is-active">
+            <div function="close-edit-version" class="modal-background"></div>
+            <div class="modal-content">
+                <div class="box">
+                    <h3 class="is-size-4">Edit version</h3>
+                </div>
+                <button
+                    function="close-edit-version"
+                    class="modal-close is-large"
+                    aria-label="close"
+                ></button>
+            </div>
+        </div> `;
+    }
 }

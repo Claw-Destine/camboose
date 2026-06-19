@@ -16,3 +16,17 @@ Recipe driven software development AI workflow orchestrator
 ## 3rd Pary software
 
 All the services necessary for a local deployment are in `docker-compose.yml`.
+
+## Formatting
+
+From the repository root:
+
+```sh
+./scripts/format.sh
+```
+
+To verify formatting without rewriting files:
+
+```sh
+./scripts/format-check.sh
+```
