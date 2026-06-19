@@ -20,9 +20,10 @@ func NewSpecsHandler(pm *pm.ProjectControler, sm *specs.SpecsController) SpecsCo
 
 {{define "versions-list"}}
 {{range .}}
+{{$attr0 := print "data-desc=" .Description}}
+{{$attr1 := print "data-status=" .Status}}
 <version-item slot="version-list" data-id={{.Id}} data-name={{.Name}} 
-{{if .Description}}{{$attr1 := print "data-desc=" .Description}}{{$attr1 | attr}}{{end}}
-data-status={{.Status}}>
+{{if .Description}}{{$attr0 | attr}}{{$attr1 | attr}}{{end}}>
 {{range $key,$val := .StoryStatusCounts}}<div slot="vi-story-status" class="level-item has-text-centered">
 <div><p class="heading">{{$key}}</p><p class="has-text-weight-semibold is-size-4">{{$val}}</p></div></div>{{end}}
 </version-item>{{end}}
