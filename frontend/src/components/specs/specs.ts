@@ -2,7 +2,7 @@ import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { ElementBase } from "../elementBase";
 import htmx from "htmx.org";
-import { showNotification } from "../../utils";
+import { insertCustomElement, removeElement, showNotification } from "../../utils";
 
 @customElement("camb-specs")
 class SpecsComponent extends ElementBase {
@@ -59,6 +59,12 @@ class VersionItem extends ElementBase {
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;
     }
+    private openEditVersuibModal(_: Event) {
+        insertCustomElement(
+            '<edit-version-modal id="edit-version-modal"></edit-version-modal>',
+            document.body,
+        );
+    }
     protected render() {
         return html`<div name="vi-root" class="box container is-fluid">
             <button
@@ -89,7 +95,8 @@ class VersionItem extends ElementBase {
                 </div>
                 <div class="level-item has-text-centered">
                     <div>
-                        <button name="vi-edit" class="button">Edit</button>
+                        <button name="vi-edit" class="button"
+                         @click=${this.openEditVersuibModal}>Edit</button>
                     </div>
                 </div>
                 <slot name="vi-story-status"></slot>
@@ -106,17 +113,21 @@ class EditVersionModal extends LitElement {
     protected createRenderRoot(): HTMLElement | DocumentFragment {
         return this;
     }
+    protected closeMe(_: Event) {
+        removeElement("#edit-version-modal", document.body);
+    }
     protected render() {
         return html`<div id="editversion" class="modal is-active">
-            <div function="close-edit-version" class="modal-background"></div>
+            <div class="modal-background" @click=${this.closeMe}></div>
             <div class="modal-content">
                 <div class="box">
                     <h3 class="is-size-4">Edit version</h3>
                 </div>
                 <button
-                    function="close-edit-version"
+
                     class="modal-close is-large"
                     aria-label="close"
+                    @click=${this.closeMe}
                 ></button>
             </div>
         </div> `;
