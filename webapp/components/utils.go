@@ -1,9 +1,12 @@
 package components
 
 import (
+	"encoding/json"
 	"html/template"
 	"log/slog"
 	"net/http"
+
+	dt "claw-destine.com/camboose/core/datatypes"
 )
 
 // qk - query param keys keys
@@ -62,5 +65,9 @@ var funcMap = template.FuncMap{
 	},
 	"safe": func(s string) template.HTML {
 		return template.HTML(s)
+	},
+	"statsArray": func(rs map[dt.RequirementStatus]int) template.HTMLAttr {
+		val, _ := json.Marshal(rs)
+		return (template.HTMLAttr)("data-stats=" + string(val))
 	},
 }
